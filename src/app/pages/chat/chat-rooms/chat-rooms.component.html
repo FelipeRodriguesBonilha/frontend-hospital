@@ -1,0 +1,16 @@
+<div class="chat-rooms">
+    @for (room of roomsUser; track $index) {
+    <div class="room" (click)="connectRoom(room)">
+        <img class="img-room" src="https://climba.com.br/blog/wp-content/uploads/2018/03/chat-ecommerce.jpg" />
+
+        <div class="infos-room">
+            <p class="title-room">{{room.room.name}}</p>
+            <p class="last-message">Hello</p>
+        </div>
+    </div>
+    }
+    @if(roomsUser.length === 0){
+    <p><strong>Este usuário não possuí salas de chat</strong></p>
+    }
+    <button (click)="logout()">Logout</button>
+</div>

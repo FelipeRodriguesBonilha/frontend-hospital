@@ -1,0 +1,32 @@
+<div class="chat-messages">
+    @if(roomId){
+    <div #messagesContainer class="messages-container">
+        @for(message of messages; track $index){
+        <div class="message" [ngClass]="isMyMessage(message) ? 'user' : 'other'">
+            <p><strong>{{ message.sender.name }}:</strong></p>
+            <p>{{ message.content }}</p>
+
+            @if(isMyMessage(message)){
+            <span class="read-indicator">
+                <p>{{ message.createdAt | date:'dd/MM/yyyy' }}</p>
+                <mat-icon [ngStyle]="{'color': message.seenByAll ? 'blue' : 'gray'}">check</mat-icon>
+            </span>
+            }
+        </div>
+        }
+        @if(messages.length === 0){
+        <div>
+            <p><strong>Esta sala não possui mensagens</strong></p>
+        </div>
+        }
+    </div>
+    <div class="input-message">
+        <mat-form-field>
+            <mat-label>Mensagem</mat-label>
+            <input matInput placeholder="Ex. Olá, tudo bem?" type="text" [(ngModel)]="newMessage"
+                (keyup.enter)="sendMessage()">
+        </mat-form-field>
+        <mat-icon color="primary" (click)="sendMessage()">send</mat-icon>
+    </div>
+    }
+</div>

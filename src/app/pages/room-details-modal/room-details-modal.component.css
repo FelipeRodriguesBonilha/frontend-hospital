@@ -1,0 +1,42 @@
+
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.edit-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.save-button {
+    margin-left: 10px;
+}
+
+.search-option {
+    background-color: rgb(207, 207, 207) !important;
+}
+
+.search-input::placeholder {
+    color: #646464;
+    opacity: 1;
+}
+
+.search-input {
+    box-sizing: border-box;
+    border: none;
+    outline: none;
+    font-size: 14px;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.edit-room-actions {
+    display: flex;
+    justify-content: flex-end;
+}

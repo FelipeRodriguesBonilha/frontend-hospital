@@ -1,0 +1,25 @@
+<div class="login-page">
+    <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <div class="login-texts">
+            <h2><b>Formulário de Login</b></h2>
+            <p>Insira suas credencias para se logar no sistema!</p>
+        </div>
+        <div class="login-inputs">
+            <mat-form-field class="example-full-width">
+                <mat-label>E-mail</mat-label>
+                <input matInput placeholder="Ex. email@email.com" formControlName="email">
+                <mat-error>teste</mat-error>
+            </mat-form-field>
+            <mat-form-field class="example-full-width">
+                <mat-label>Senha</mat-label>
+                <input matInput placeholder="Ex. senha123" type="text" formControlName="password">
+                <mat-error>teste</mat-error>
+            </mat-form-field>
+            <section class="button-container">
+                <button mat-flat-button color="primary" [type]="'submit'">
+                    <mat-icon>login</mat-icon>Entrar
+                </button>
+            </section>
+        </div>
+    </form>
+</div>

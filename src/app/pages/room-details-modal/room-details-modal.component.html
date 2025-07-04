@@ -1,0 +1,58 @@
+<h1 mat-dialog-title>Detalhes da Sala: {{ data.room.name }}</h1>
+<div mat-dialog-content class="content">
+    @if(!isEdit){
+    <p>Nome: {{ data.room.name }}</p>
+    <p>Descrição: {{ data.room.description }}</p>
+    } @else {
+    <form [formGroup]="editForm" (ngSubmit)="onSubmit()" class="edit-form">
+        <mat-form-field appearance="outline">
+            <mat-label>Nome</mat-label>
+            <input matInput formControlName="name">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <mat-label>Descrição</mat-label>
+            <input matInput formControlName="description">
+        </mat-form-field>
+    </form>
+    }
+    <div class="edit-room-actions">
+        @if(!isEdit){
+        <button mat-stroked-button color="primary" (click)="onEdit()">
+            <mat-icon>edit</mat-icon>Editar
+        </button>
+        } @else {
+        <button mat-stroked-button (click)="onEdit()">
+            <mat-icon>cancel</mat-icon>Cancelar
+        </button>
+        <button mat-stroked-button color="primary" [type]="'submit'" class="save-button">
+            <mat-icon>save</mat-icon>Salvar
+        </button>
+        }
+    </div>
+
+    <div class="participants">
+        <p>Participantes</p>
+
+        <form>
+            <mat-form-field appearance="outline">
+                <mat-label>Participantes</mat-label>
+                <mat-select multiple>
+                    <mat-option class="search-option">
+                        <input #searchInput class="search-input" matInput placeholder="Buscar Usuários"
+                            (keyup)="onSearch(searchInput.value)" (keydown.space)="$event.stopPropagation()"
+                            (click)="$event.stopPropagation()" />
+                    </mat-option>
+
+                    @for (option of filteredOptions; track option.value) {
+                    <mat-option [value]="option.value">
+                        {{ option.label }}
+                    </mat-option>
+                }
+                </mat-select>
+            </mat-form-field>
+        </form>
+    </div>
+</div>
+<div mat-dialog-actions class="actions">
+    <button mat-stroked-button (click)="onClose()">Fechar</button>
+</div>

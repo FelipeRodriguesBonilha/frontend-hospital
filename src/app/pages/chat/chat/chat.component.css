@@ -1,0 +1,29 @@
+.page-chat {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+}
+
+.chat {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+app-chat-rooms {
+    width: 500px;
+    height: 100vh;
+}
+
+app-info-room {
+    width: 100%;
+    height: 70px;
+}
+
+app-chat-messages {
+    flex-grow: 1;
+    height: calc(100% - 70px);
+}
