@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
-import { LayoutComponent } from './pages/layout/layout.component';
 import { LoginComponent } from './pages/auth/login/login.component';
-import { ChatComponent } from './pages/chat/chat/chat.component';
+import { ChatRoomsComponent } from './pages/chat/chat-rooms/chat-rooms.component';
+import { LayoutComponent } from './pages/layout/layout.component';
 
 export const routes: Routes = [
     { 
@@ -11,7 +11,7 @@ export const routes: Routes = [
         path: '', 
         component: LayoutComponent,
         children: [
-            { path: 'chat', component: ChatComponent}
+            { path: 'chat', component: ChatRoomsComponent}
         ]
     }
 ];

@@ -1,9 +1,0 @@
-<div class="page-chat">
-    <app-chat-rooms (roomSelected)="handleRoomSelected($event)"></app-chat-rooms>
-    <div class="chat">
-        @if(selectedRoom){
-            <app-info-room [room]="selectedRoom.room"></app-info-room>
-            <app-chat-messages [roomId]="selectedRoom.room.id"></app-chat-messages>
-        }
-    </div>
-</div>

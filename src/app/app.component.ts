@@ -1,4 +1,3 @@
-import { SocketService } from './core/services/socket/socket.service';
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 

@@ -9,25 +9,26 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
+import { InfoRoomComponent } from "../info-room/info-room.component";
+import { ReturnRoom } from '../../../core/models/room/return-room.model';
 
 @Component({
   selector: 'app-chat-messages',
   standalone: true,
   imports: [
-    NgClass,
     MatInputModule,
     MatFormFieldModule,
     MatButtonModule,
     MatIconModule,
     FormsModule,
-    NgStyle,
-    DatePipe
-  ],
+    DatePipe,
+    InfoRoomComponent
+],
   templateUrl: './chat-messages.component.html',
   styleUrl: './chat-messages.component.css'
 })
 export class ChatMessagesComponent implements OnInit, AfterViewChecked {
-  @Input() roomId!: string;
+  @Input() room!: ReturnRoom;
   user!: ReturnUser;
   messages: ReturnMessage[] = [];
   newMessage = '';
@@ -71,17 +72,14 @@ export class ChatMessagesComponent implements OnInit, AfterViewChecked {
 
   scrollToBottom(): void {
     try {
-      if (this.messagesContainer) {
-        this.messagesContainer.nativeElement.scrollTop =
-          this.messagesContainer.nativeElement.scrollHeight;
-      }
+      if (this.messagesContainer) this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
     } catch (err) {}
   }
 
   sendMessage(): void {
     const createMessageDto: any = {
       content: this.newMessage,
-      roomId: this.roomId,
+      roomId: this.room.id,
     };
 
     if (this.newMessage.trim()) {
@@ -91,9 +89,7 @@ export class ChatMessagesComponent implements OnInit, AfterViewChecked {
   }
 
   markMessagesAsRead(): void {
-    if (this.roomId) {
-      this.socketService.markMessagesAsRead(this.roomId);
-    }
+    if (this.room.id) this.socketService.markMessagesAsRead(this.room.id);
   }
 
   isMyMessage(message: ReturnMessage): boolean {

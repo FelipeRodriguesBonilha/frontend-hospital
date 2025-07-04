@@ -4,6 +4,7 @@ import { io, Socket } from 'socket.io-client';
 import { ReturnMessage } from '../../models/message/return-message.model';
 import { ReturnRoomUser } from '../../models/room-user/return-room-user.model';
 import { AuthService } from '../auth/auth.service';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +12,6 @@ import { AuthService } from '../auth/auth.service';
 export class SocketService {
   private socket!: Socket;
   private readonly socketUrl = 'http://localhost:3000';
-  private selectedRoom!: ReturnRoomUser;
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
@@ -77,13 +77,5 @@ export class SocketService {
 
   getMessageReadStatus(messageId: string, roomId: string): void {
     this.socket.emit('get-message-read-status', { messageId, roomId });
-  }
-
-  setSelectedRoom(room: ReturnRoomUser) {
-    this.selectedRoom = room;
-  }
-
-  getSelectedRoom(): ReturnRoomUser {
-    return this.selectedRoom;
   }
 }
