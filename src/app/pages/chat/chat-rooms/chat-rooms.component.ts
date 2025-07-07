@@ -36,8 +36,8 @@ export class ChatRoomsComponent {
       if (!token) this.roomsUser = [];
     });
 
-    this.socketService.onRoomsUser((roomsUser) => {
-      this.roomsUser = roomsUser;
+    this.socketService.roomsUser$.subscribe(rooms => {
+      this.roomsUser = rooms;
     });
   }
 

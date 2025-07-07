@@ -1,10 +1,10 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { ReturnMessage } from '../../models/message/return-message.model';
 import { ReturnRoomUser } from '../../models/room-user/return-room-user.model';
 import { AuthService } from '../auth/auth.service';
-import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +12,9 @@ import { BehaviorSubject } from 'rxjs';
 export class SocketService {
   private socket!: Socket;
   private readonly socketUrl = 'http://localhost:3000';
+
+  private roomsUserSubject = new BehaviorSubject<ReturnRoomUser[]>([]);
+  public roomsUser$ = this.roomsUserSubject.asObservable();
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
@@ -27,6 +30,10 @@ export class SocketService {
     if (isPlatformBrowser(this.platformId)) {
       this.socket = io(this.socketUrl, {
         auth: { authorization: this.authService.getToken() }
+      });
+
+      this.onRoomsUser((rooms: ReturnRoomUser[]) => {
+        this.roomsUserSubject.next(rooms);
       });
     }
   }
