@@ -1,1 +1,96 @@
-<p>schedulings works!</p>
+<div class="d-flex flex-column h-100 vw-100">
+    <div class="d-flex justify-content-between align-items-center p-3 border-bottom bg-light vw-100">
+        <h4 class="mb-0 text-primary fw-semibold">
+            <i class="bi bi-clock me-2"></i>Agendamentos
+        </h4>
+        <button class="btn btn-primary btn-sm d-flex align-items-center" [routerLink]="'/schedulings/create'">
+            <i class="bi bi-plus-circle me-1"></i>
+            Adicionar Agendamento
+        </button>
+    </div>
+
+    <div class="p-3 border-bottom bg-white">
+        <div class="position-relative">
+            <input type="text" class="form-control form-control-sm" placeholder="Pesquisar agendamentos..."
+                [formControl]="searchControl">
+            <i class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3 text-muted"></i>
+        </div>
+    </div>
+
+    <div class="flex-grow-1 overflow-auto p-2">
+        @for (scheduling of filteredSchedulings; track $index) {
+        <div class="card mb-2 border-0 shadow-sm cursor-pointer scheduling-card" role="button" tabindex="0"
+            (keydown.enter)="selectScheduling(scheduling)" (keydown.space)="selectScheduling(scheduling)">
+            <div class="card-body p-3" (click)="selectScheduling(scheduling)">
+                <div class="d-flex align-items-center">
+                    <div class="position-relative me-3">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-sm"
+                            style="width: 45px; height: 45px;">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <span
+                            class="position-absolute top-0 start-100 translate-middle p-1 bg-success border border-2 border-white rounded-circle">
+                            <span class="visually-hidden">Ativo</span>
+                        </span>
+                    </div>
+                    <div class="flex-grow-1 min-width-0">
+                        <h4 class="card-title mb-1 text-truncate fw-semibold text-dark">
+                            {{ scheduling.startDate | date:'dd/MM/yyyy HH:mm' }} até {{ scheduling.endDate |
+                            date:'dd/MM/yyyy HH:mm' }}
+                        </h4>
+                        <div class="d-flex flex-column gap-1">
+                            <small class="text-muted d-flex align-items-center">
+                                <i class="bi bi-hospital me-1"></i>
+                                <span class="text-truncate">Hospital: {{ scheduling.hospital?.companyName }}</span>
+                            </small>
+                            <small class="text-muted d-flex align-items-center">
+                                <i class="bi bi-person-fill me-1"></i>
+                                <span class="text-truncate">Usuário que criou o agendamento: {{
+                                    scheduling.createdBy?.name }}</span>
+                            </small>
+                            <small class="text-muted d-flex align-items-center">
+                                <i class="bi bi-person-badge me-1"></i>
+                                <span class="text-truncate">Médico que irá atender: {{ scheduling.provider?.name
+                                    }}</span>
+                            </small>
+                            <small class="text-muted d-flex align-items-center">
+                                <i class="bi bi-person-vcard-fill me-1"></i>
+                                <span class="text-truncate">Paciente: {{ scheduling.patient?.name }}</span>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="ms-2 d-flex align-items-center gap-1">
+                        <button mat-icon-button [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()">
+                            <mat-icon>more_vert</mat-icon>
+                        </button>
+
+                        <mat-menu #menu="matMenu">
+                            <button mat-menu-item [routerLink]="['/schedulings', scheduling.id, 'edit']">
+                                <mat-icon>edit</mat-icon>
+                                <span>Editar</span>
+                            </button>
+                            <button mat-menu-item (click)="deleteSchedulings(scheduling, $event)">
+                                <mat-icon color="warn">delete</mat-icon>
+                                <span class="text-danger">Excluir</span>
+                            </button>
+                        </mat-menu>
+                    </div>
+                </div>
+            </div>
+        </div>
+        }
+
+        @if(filteredSchedulings.length === 0) {
+        <div class="text-center p-4">
+            <div class="text-muted">
+                <i class="bi bi-clock display-1 mb-3 opacity-50"></i>
+                <h4 class="fw-semibold">{{searchControl.value ? 'Nenhum agendamento encontrado' : 'Nenhum agendamento
+                    cadastrado'}}
+                </h4>
+                <p class="small mb-0">{{searchControl.value ? 'Tente ajustar os termos de busca.' : 'Não há agendamentos
+                    cadastrados no sistema no momento.'}}</p>
+            </div>
+        </div>
+        }
+    </div>
+</div>

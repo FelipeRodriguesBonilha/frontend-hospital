@@ -4,7 +4,6 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { LoginPayload } from '../../models/auth/login-payload.model';
 import { ReturnLogin } from '../../models/auth/return-login.model';
 import { environment } from '../../../../environments/environment';
-import { JwtHelperService } from '@auth0/angular-jwt';
 import { ReturnUser } from '../../models/user/return-user.model';
 import { isPlatformBrowser } from '@angular/common';
 
@@ -13,8 +12,6 @@ import { isPlatformBrowser } from '@angular/common';
 })
 export class AuthService {
   private readonly apiUrl = `${environment.apiUrl}/auth`;
-
-  private jwtHelper = new JwtHelperService();
 
   private currentUserSubject!: BehaviorSubject<ReturnUser | null> ;
   public currentUser$!: Observable<ReturnUser | null> ;
@@ -40,7 +37,6 @@ export class AuthService {
         localStorage.setItem('user', JSON.stringify(response.user));
         
         this.currentUserSubject.next(response.user);
-
         this.token$.next(response.accessToken);
       })
     );
@@ -57,7 +53,7 @@ export class AuthService {
     return localStorage.getItem('token');
   }
 
-  getCurrentUser(): any {
+  getCurrentUser() {
     return this.currentUserSubject.value;
   }
 }

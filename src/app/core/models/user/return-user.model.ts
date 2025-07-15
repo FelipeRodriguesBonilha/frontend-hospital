@@ -1,3 +1,6 @@
+import { ReturnHospital } from "../hospital/return-hospital";
+import { ReturnRole } from "../role/return-role";
+
 export interface ReturnUser {
     id: string;
     hospitalId: string;
@@ -6,4 +9,6 @@ export interface ReturnUser {
     phone: string;
     email: string;
     roleId: string;
+    hospital: ReturnHospital;
+    role: ReturnRole;
 }

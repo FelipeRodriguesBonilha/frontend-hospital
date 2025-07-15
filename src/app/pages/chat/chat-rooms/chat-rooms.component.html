@@ -8,9 +8,9 @@
         </button>
 
         <div class="p-3 border-bottom bg-light flex-shrink-0" [class.text-center]="isMinimized">
-            <h6 class="mb-0 text-primary fw-semibold" [class.d-none]="isMinimized">
+            <h4 class="mb-0 text-primary fw-semibold" [class.d-none]="isMinimized">
                 <i class="bi bi-chat-dots me-2"></i>Salas de Chat
-            </h6>
+            </h4>
         </div>
 
         <div class="flex-grow-1 overflow-auto p-2">
@@ -30,9 +30,9 @@
                                 </span>
                             </div>
                             <div class="flex-grow-1 min-width-0" [class.d-none]="isMinimized">
-                                <h6 class="card-title mb-1 text-truncate fw-semibold text-dark">
+                                <h4 class="card-title mb-1 text-truncate fw-semibold text-dark">
                                     {{room.room.name}}
-                                </h6>
+                                </h4>
                             </div>
                             <div [class.d-none]="!isMinimized" [attr.title]="room.room.name" data-bs-toggle="tooltip">
                                 <i class="bi bi-three-dots-vertical text-muted"></i>
@@ -66,7 +66,7 @@
         @if(currentRoom) {
             <app-chat-messages [room]="currentRoom.room" class="h-100"></app-chat-messages>
         } @else {
-            <div class="h-100 d-flex align-items-center justify-content-center bg-light">
+            <div class="h-100 d-flex align-items-center justify-content-center">
                 <div class="text-center p-5">
                     <div class="mb-4">
                         <i class="bi bi-chat-square-text text-primary display-1 opacity-50"></i>

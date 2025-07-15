@@ -42,7 +42,7 @@ export class RoomDetailsModalComponent {
       description: [this.data.room.description, Validators.required]
     });
 
-    this.getAllParticipantsRoom();
+    this.findAllParticipantsRoom();
   }
 
   onEdit() {
@@ -57,7 +57,7 @@ export class RoomDetailsModalComponent {
     console.log(this.editForm.value);
   }
 
-  getAllParticipantsRoom() {
+  findAllParticipantsRoom() {
 
   }
 
