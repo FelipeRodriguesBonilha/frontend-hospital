@@ -1,0 +1,46 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom">
+    <div class="container-fluid px-3">
+        <a class="navbar-brand d-flex align-items-center text-primary fw-bold" routerLink="/">
+            <i class="bi bi-shield-fill-plus me-2 fs-4"></i>
+            HospitalChat
+        </a>
+
+        <button class="navbar-toggler" type="button" aria-controls="navbarNav" [attr.aria-expanded]="isMenuOpen"
+            aria-label="Toggle navigation" (click)="toggleMenu()">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" [ngClass]="{ 'show': isMenuOpen }" id="navbarNav">
+            <ul class="navbar-nav me-auto align-items-lg-center flex-column flex-lg-row mt-3 mt-lg-0">
+                @for (nav of navs; track $index) {
+                <li class="nav-item">
+                    <a class="nav-link" [routerLink]="nav.route" (click)="closeMenu()">
+                        {{ nav.name }}
+                    </a>
+                </li>
+                }
+            </ul>
+
+            <ul class="navbar-nav align-items-lg-center flex-column flex-lg-row mt-3 mt-lg-0">
+                <li class="nav-item me-lg-2 mb-2 mb-lg-0">
+                    <button mat-stroked-button color="accent" [routerLink]="'/profile'" (click)="closeMenu()"
+                        class="w-100 w-lg-auto">
+                        Perfil
+                    </button>
+                </li>
+                <li class="nav-item mb-2 mb-lg-0 me-2">
+                    <span class="navbar-text text-center text-lg-start d-block">
+                        <i class="bi bi-person-circle me-1"></i>
+                        <strong>{{ user.name }}</strong>
+                        <small class="text-muted ms-2">({{ user.role.name }})</small>
+                    </span>
+                </li>
+                <li class="nav-item">
+                    <button mat-stroked-button color="primary" (click)="logout()" class="w-100 w-lg-auto">
+                        Sair
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

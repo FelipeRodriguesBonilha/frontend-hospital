@@ -1,0 +1,156 @@
+<div class="d-flex flex-column h-100">
+    @if(room.id) {
+    <div class="bg-white border-bottom shadow-sm p-3 flex-shrink-0">
+        <div class="d-flex align-items-center">
+            <div class="me-3">
+                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px;">
+                    <i class="bi bi-hospital"></i>
+                </div>
+            </div>
+            <div class="flex-grow-1">
+                <h4 class="mb-0 fw-semibold text-dark">{{ room.name }}</h4>
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-light btn-sm rounded-circle" type="button" data-bs-toggle="dropdown" (click)="openDetailsRoom(room)">
+                    <i class="bi bi-three-dots-vertical"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div #messagesContainer class="flex-grow-1 overflow-auto px-3 py-4">
+        @for(message of messages; track message.id || $index) {
+        @if(isMyMessage(message)) {
+        <div class="d-flex justify-content-end mb-3">
+            <div class="message-bubble-sent" style="max-width: 75%;">
+                <div class="card border-0 shadow-sm bg-primary text-white">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <small class="fw-semibold opacity-75">{{ message.sender.name }}</small>
+                            <small class="text-white-50 ms-2">{{ message.createdAt | date:'HH:mm' }}</small>
+                        </div>
+
+                        <p class="mb-2 text-break lh-base">{{ message.content }}</p>
+
+                        <div class="d-flex flex-wrap gap-2 mb-2">
+                            @for(archive of message.archives; track $index){
+                            @if(typeArchive(archive.type) === 'image'){
+                            <img [src]="imageUrls.get(archive.name)" class="rounded shadow-sm" (click)="openImageViewer(imageUrls.get(archive.name)!)"
+                                style="width: 48px; height: 48px; object-fit: cover;" alt="anexo" />
+                            } @else if(typeArchive(archive.type) === 'pdf') {
+                            <a [href]="imageUrls.get(archive.name)" [attr.download]="archive.name"
+                                class="d-flex align-items-center justify-content-center bg-light rounded shadow-sm me-2 text-decoration-none"
+                                style="width: 48px; height: 48px;" title="Baixar PDF">
+                                <i class="bi bi-file-earmark-pdf-fill text-danger fs-4"></i>
+                            </a>
+                            }
+                            }
+                        </div>
+
+                        <div class="text-end">
+                            <small class="text-white-50 me-2">{{ message.createdAt | date:'dd/MM/yyyy' }}</small>
+                            <i class="bi bi-check-all" [class.text-green]="message.seenByAll"
+                                [class.text-white-50]="!message.seenByAll"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        } @else {
+        <div class="d-flex justify-content-start mb-3">
+            <div class="message-bubble-received" style="max-width: 75%;">
+                <div class="card border-0 shadow-sm bg-white">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <small class="fw-semibold text-primary">{{ message.sender.name }}</small>
+                            <small class="text-muted ms-2">{{ message.createdAt | date:'HH:mm' }}</small>
+                        </div>
+
+                        <p class="mb-2 text-dark text-break lh-base">{{ message.content }}</p>
+
+                        <div class="d-flex flex-wrap gap-2 mb-2">
+                            @for(archive of message.archives; track $index){
+                                @if(typeArchive(archive.type) === 'image'){
+                                    <img [src]="imageUrls.get(archive.name)" class="rounded shadow-sm" (click)="openImageViewer(imageUrls.get(archive.name)!)"
+                                    style="width: 48px; height: 48px; object-fit: cover;" alt="anexo" />
+                                } @else if(typeArchive(archive.type) === 'pdf') {
+                                    <a [href]="imageUrls.get(archive.name)" [attr.download]="archive.name"
+                                        class="d-flex align-items-center justify-content-center bg-light rounded shadow-sm me-2 text-decoration-none"
+                                        style="width: 48px; height: 48px;" title="Baixar PDF">
+                                        <i class="bi bi-file-earmark-pdf-fill text-danger fs-4"></i>
+                                    </a>
+                                }
+                            }
+                        </div>
+
+                        <div class="text-end">
+                            <small class="text-muted">{{ message.createdAt | date:'dd/MM/yyyy' }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        }
+        }
+
+        @if(messages.length === 0) {
+        <div class="d-flex align-items-center justify-content-center h-100">
+            <div class="text-center">
+                <div class="card bg-white border-0 shadow-sm mx-auto" style="max-width: 400px;">
+                    <div class="card-body p-5">
+                        <i class="bi bi-chat-dots text-primary mb-3 display-1 opacity-50"></i>
+                        <h5 class="text-muted mb-3">Nenhuma mensagem ainda</h5>
+                        <p class="text-muted mb-0">Seja o primeiro a enviar uma mensagem nesta sala!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+
+
+    <div class="bg-white border-top shadow-sm p-3 flex-shrink-0">
+        <div class="d-flex align-items-end gap-2">
+            <div class="flex-shrink-0 position-relative" style="width: 45px; height: 45px;">
+                <label for="fileInput"
+                    class="btn btn-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center position-relative w-100 h-100 m-0">
+                    <i class="bi bi-paperclip text-white"></i>
+                    <input #fileInput type="file" id="fileInput" hidden multiple (change)="onFilesSelected($event)" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp,image/svg+xml,application/pdf" />
+
+                    @if (files.length) {
+                    <span
+                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary text-white shadow-sm"
+                        style="font-size: 0.7rem; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">
+                        {{ files.length }}
+                    </span>
+                    }
+
+                    @if (files.length) {
+                    <button (click)="clearFiles()"
+                        class="position-absolute top-100 start-0 translate-middle badge rounded-pill bg-body-secondary text-black shadow-sm"
+                        style="font-size: 0.7rem; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                    }
+                </label>
+            </div>
+
+            <div class="flex-grow-1 position-relative">
+                <textarea class="form-control border-0 bg-light resize-none" placeholder="Digite sua mensagem..."
+                    [(ngModel)]="newMessage" (keydown.enter)="sendMessage()" [disabled]="!room.id" rows="1"
+                    style="max-height: 120px; min-height: 45px; padding-right: 45px; resize: none;"></textarea>
+            </div>
+
+            <div class="flex-shrink-0">
+                <button
+                    class="btn btn-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+                    (click)="sendMessage()" [disabled]="!newMessage.trim() || !room.id"
+                    style="width: 45px; height: 45px;">
+                    <i class="bi bi-send-fill"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    }
+</div>

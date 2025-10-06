@@ -1,3 +1,4 @@
+import { ReturnArchive } from "../archive/return-archive.model";
 import { ReturnRoom } from "../room/return-room.model";
 import { ReturnUser } from "../user/return-user.model";
 
@@ -10,4 +11,6 @@ export interface ReturnMessage {
     createdAt?: Date;
     seenByAll?: boolean;
     room: ReturnRoom;
+
+    archives?: ReturnArchive[];
 }

@@ -1,8 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
-import { ReturnHospital } from '../../models/hospital/return-hospital';
-import { ReturnRole } from '../../models/role/return-role';
+import { ReturnRole } from '../../models/role/return-role.model';
 
 @Injectable({
   providedIn: 'root'

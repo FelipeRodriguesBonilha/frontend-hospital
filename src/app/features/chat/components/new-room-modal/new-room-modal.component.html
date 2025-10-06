@@ -1,0 +1,48 @@
+<h1 mat-dialog-title>Nova Sala</h1>
+
+<div mat-dialog-content>
+    <form [formGroup]="roomForm" (ngSubmit)="onSubmit()">
+        <div class="mb-3">
+            <label for="name" class="form-label">
+                Nome da Sala <span class="text-danger">*</span>
+            </label>
+            <input id="name" type="text" class="form-control" formControlName="name" />
+            @if(roomForm.get('name')?.invalid && roomForm.get('name')?.touched){
+            <div class="text-danger">
+                @if(roomForm.get('name')?.hasError('required')){
+                    Nome da sala é obrigatório.
+                }
+                @if(roomForm.get('name')?.hasError('minlength')){
+                    Nome da sala deve ter pelo menos 3 caracteres.
+                }
+            </div>
+            }
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label">
+                Descrição da Sala <span class="text-danger">*</span>
+            </label>
+            <textarea id="description" rows="3" class="form-control" formControlName="description"></textarea>
+            @if(roomForm.get('description')?.invalid && roomForm.get('description')?.touched){
+            <div class="text-danger">
+                @if(roomForm.get('description')?.hasError('required')){
+                    Descrição é obrigatória.
+                }
+                @if(roomForm.get('description')?.hasError('minlength')){
+                    Descrição deve ter pelo menos 5 caracteres.
+                }
+            </div>
+            }
+        </div>
+    </form>
+</div>
+
+<div mat-dialog-actions class="d-flex justify-content-end">
+    <button mat-stroked-button class="me-2" type="button" type="button" (click)="close()">
+        Cancelar
+    </button>
+    <button mat-stroked-button type="button" [disabled]="roomForm.invalid" (click)="onSubmit()">
+        Criar
+    </button>
+</div>

@@ -2,9 +2,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { CreateExam } from '../../models/exam/create-exam';
-import { ReturnExam } from '../../models/exam/return-exam';
-import { UpdateExam } from '../../models/exam/update-exam';
+import { ReturnExam } from '../../models/exam/return-exam.model';
+import { ReturnPaginated } from '../../models/pagination/return-paginated.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,31 +15,51 @@ export class ExamService {
     private http: HttpClient,
   ) { }
 
-  findAllExams(description?: string) {
+  findAllExams(
+    filters: {
+      description?: string,
+      page?: number,
+      limit?: number
+    }
+  ) {
     let params = new HttpParams();
 
-    if(description) params = params.set('description', description);
+    if (filters?.description) params = params.set('description', filters.description);
+    if (filters?.page !== undefined) params = params.set('page', filters.page);
+    if (filters?.limit !== undefined) params = params.set('limit', filters.limit);
 
-    return this.http.get<ReturnExam[]>(`${this.apiUrl}`, { params });
+    return this.http.get<ReturnPaginated<ReturnExam>>(`${this.apiUrl}`, { params });
   }
 
-  findExamsByHospital(hospitalId: string, description?: string) {
+  findExamsByHospital(hospitalId: string,
+    filters: {
+      description?: string,
+      page?: number,
+      limit?: number
+    }
+  ) {
     let params = new HttpParams();
 
-    if(description) params = params.set('description', description);
-    
-    return this.http.get<ReturnExam[]>(`${this.apiUrl}/hospital/${hospitalId}`, { params });
+    if (filters?.description) params = params.set('description', filters.description);
+    if (filters?.page !== undefined) params = params.set('page', filters.page);
+    if (filters?.limit !== undefined) params = params.set('limit', filters.limit);
+
+    return this.http.get<ReturnPaginated<ReturnExam>>(`${this.apiUrl}/hospital/${hospitalId}`, { params });
   }
 
   findExamById(examId: string) {
     return this.http.get<ReturnExam>(`${this.apiUrl}/${examId}`);
   }
 
-  createExam(createExam: CreateExam): Observable<ReturnExam> {
-    return this.http.post<ReturnExam>(`${this.apiUrl}`, createExam);
+  createExam(data: FormData): Observable<ReturnExam> {
+    return this.http.post<ReturnExam>(`${this.apiUrl}`, data);
   }
 
-  updateExam(examId: string, updateExam: UpdateExam): Observable<ReturnExam> {
-    return this.http.patch<ReturnExam>(`${this.apiUrl}/${examId}`, updateExam);
+  updateExam(examId: string, data: FormData): Observable<ReturnExam> {
+    return this.http.patch<ReturnExam>(`${this.apiUrl}/${examId}`, data);
+  }
+
+  deleteExam(examId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${examId}`);
   }
 }

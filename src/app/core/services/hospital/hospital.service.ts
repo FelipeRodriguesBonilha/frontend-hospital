@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
-import { environment } from '../../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { ReturnHospital } from '../../models/hospital/return-hospital';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CreateHospital } from '../../models/hospital/create-hospital';
-import { UpdateHospital } from '../../models/hospital/update-hospital';
+import { environment } from '../../../../environments/environment';
+import { CreateHospital } from '../../models/hospital/create-hospital.model';
+import { ReturnHospital } from '../../models/hospital/return-hospital.model';
+import { UpdateHospital } from '../../models/hospital/update-hospital.model';
+import { ReturnPaginated } from '../../models/pagination/return-paginated.model';
 
 @Injectable({
   providedIn: 'root'
@@ -14,17 +15,25 @@ export class HospitalService {
 
   constructor(
     private http: HttpClient,
-  ) {}
+  ) { }
 
-  findAllHospitals(companyName?: string) {
+  findAllHospitals(
+    filters: {
+      companyName?: string,
+      page?: number,
+      limit?: number
+    }
+  ) {
     let params = new HttpParams();
 
-    if(companyName) params = params.set('companyName', companyName);
-      
-    return this.http.get<ReturnHospital[]>(`${this.apiUrl}`, { params });
+    if (filters?.companyName) params = params.set('companyName', filters.companyName);
+    if (filters?.page !== undefined) params = params.set('page', filters.page);
+    if (filters?.limit !== undefined) params = params.set('limit', filters.limit);
+
+    return this.http.get<ReturnPaginated<ReturnHospital>>(`${this.apiUrl}`, { params });
   }
 
-  findHospitalById(hospitalId: string){
+  findHospitalById(hospitalId: string) {
     return this.http.get<ReturnHospital>(`${this.apiUrl}/${hospitalId}`);
   }
 
@@ -34,5 +43,9 @@ export class HospitalService {
 
   updateHospital(hospitalId: string, updateHospital: UpdateHospital): Observable<ReturnHospital> {
     return this.http.patch<ReturnHospital>(`${this.apiUrl}/${hospitalId}`, updateHospital);
+  }
+
+  deleteHospital(hospitalId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${hospitalId}`);
   }
 }

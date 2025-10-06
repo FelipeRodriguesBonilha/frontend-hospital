@@ -1,0 +1,48 @@
+<div class="d-flex align-items-center justify-content-center vh-100 vw-100 overflow-auto p-4 bg-light">
+    <div class="container p-3 bg-white shadow-sm" style="max-width: 500px; border-radius: 8px;">
+        <h2 class="mb-4 text-center fw-bold">Login</h2>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+                <label for="email" class="form-label fw-semibold">
+                    <i class="bi bi-envelope-fill me-2"></i>E-mail
+                </label>
+                <input type="email" class="form-control" id="email" placeholder="E-mail" formControlName="email"
+                    [class.is-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" />
+                <div class="invalid-feedback">
+                    <i class="bi bi-exclamation-circle-fill me-1"></i>E-mail inválido
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label fw-semibold">
+                    <i class="bi bi-key-fill me-2"></i>Senha
+                </label>
+                <div class="input-group">
+                    <input [type]="showPassword ? 'text' : 'password'" class="form-control" id="password"
+                        placeholder="Senha" formControlName="password"
+                        [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" />
+                    <span class="input-group-text password-toggle-btn"
+                          (click)="togglePasswordVisibility()"
+                          [attr.aria-label]="showPassword ? 'Ocultar senha' : 'Mostrar senha'"
+                          style="cursor: pointer; user-select: none;">
+                        <i [class]="showPassword ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill'"></i>
+                    </span>
+                    <div class="invalid-feedback">
+                        <i class="bi bi-exclamation-circle-fill me-1"></i>Senha obrigatória
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <a href="#" class="text-decoration-none" routerLink="/forgot-password">Esqueceu a senha?</a>
+            </div>
+
+            <div class="d-grid gap-2 mb-3">
+                <button mat-stroked-button class="w-100" type="submit">
+                    Entrar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

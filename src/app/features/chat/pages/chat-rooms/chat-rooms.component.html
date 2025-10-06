@@ -1,0 +1,124 @@
+<div class="d-flex h-100 vw-100">
+    <div [ngClass]="{'sidebar-expanded': !isMinimized, 'sidebar-collapsed': isMinimized}"
+        class="bg-white border-end shadow-sm position-relative d-flex flex-column transition-all">
+
+        <button
+            class="btn btn-light btn-sm position-absolute top-0 end-0 m-2 z-3 rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+            style="width: 32px; height: 32px;" (click)="toggleSidebar()"
+            [attr.aria-label]="isMinimized ? 'Expandir menu' : 'Minimizar menu'">
+            <i class="bi fs-6" [ngClass]="isMinimized ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
+        </button>
+
+        <div class="p-3 border-bottom bg-light flex-shrink-0 d-flex align-items-center justify-content-center"
+            [class.flex-column]="isMinimized">
+            <div class="text-center" [class.w-100]="isMinimized">
+                <i class="bi bi-chat-dots text-primary" [class.fs-2]="isMinimized" [hidden]="!isMinimized"></i>
+                <h4 class="mb-0 text-primary fw-semibold d-inline-block" [class.d-none]="isMinimized"
+                    [class.ms-2]="!isMinimized">
+                    Salas de Chat
+                </h4>
+            </div>
+        </div>
+
+        <div class="flex-grow-1 overflow-auto p-2">
+            <button mat-stroked-button class="w-100 mb-3" (click)="openNewRoom()">
+                Nova Sala
+            </button>
+
+            <input id="name" type="text" class="form-control mb-3" [(ngModel)]="filterTerm" (ngModelChange)="applyFilter()"
+                placeholder="Filtrar salas por nome..." />
+
+            @for (room of filteredRooms; track $index) {
+            <div class="mb-2">
+                <div class="card border-0 shadow-sm cursor-pointer room-card position-relative"
+                    (click)="connectRoom(room)" role="button" tabindex="0" (keydown.enter)="connectRoom(room)"
+                    (keydown.space)="connectRoom(room)" [class.text-center]="isMinimized">
+
+                    @if (isMinimized) {
+                    <div class="card-body p-2 d-flex justify-content-center">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-sm"
+                            style="width: 40px; height: 40px;">
+                            <i class="bi bi-hospital fs-6"></i>
+                        </div>
+                    </div>
+                    } @else {
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center">
+                            <div class="position-relative me-3">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-sm"
+                                    style="width: 45px; height: 45px;">
+                                    <i class="bi bi-hospital"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 min-width-0">
+                                <h5 class="card-title mb-1 text-truncate fw-semibold text-dark">
+                                    {{ room.name }}
+                                </h5>
+                                <p class="mb-0 text-muted small"
+                                    style="word-wrap: break-word; overflow-wrap: break-word; line-height: 1.3;">{{
+                                    room.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+
+            @if(filteredRooms.length === 0) {
+            <div class="text-center p-4" [class.d-none]="isMinimized">
+                <div class="text-muted">
+                    <i class="bi bi-chat-square-dots display-1 mb-3 opacity-50"></i>
+                    <h6 class="fw-semibold">Nenhuma sala encontrada</h6>
+                    <p class="small mb-0">Você não possui salas de chat ativas no momento.</p>
+                </div>
+            </div>
+            <div class="text-center p-2" [class.d-none]="!isMinimized">
+                <i class="bi bi-chat-square-dots text-muted opacity-50" style="font-size: 2rem;"></i>
+            </div>
+            }
+        </div>
+
+        <div class="border-top p-3 bg-light flex-shrink-0">
+            <button
+                [class]="'btn btn-outline-danger w-100 d-flex align-items-center justify-content-center'"
+                [style.width]="isMinimized ? '45px' : 'auto'" [style.height]="'auto'"
+                (click)="logout()">
+                <i class="bi bi-box-arrow-right" [class.me-2]="!isMinimized"></i>
+                <span [class.d-none]="isMinimized">Sair</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-grow-1 d-flex flex-column overflow-hidden">
+        @if(currentRoom) {
+        <app-chat-messages [room]="currentRoom" class="h-100"></app-chat-messages>
+        } @else {
+        <div class="h-100 d-flex align-items-center justify-content-center">
+            <div class="text-center p-5">
+                <div class="mb-4">
+                    <i class="bi bi-chat-square-text text-primary display-1 opacity-50"></i>
+                </div>
+                <h4 class="text-muted mb-3 fw-semibold">Bem-vindo ao HospitalChat</h4>
+                <p class="text-muted mb-4 px-3">
+                    Selecione uma sala de chat para começar a conversar com outros profissionais.
+                </p>
+                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Seguro
+                    </span>
+                    <span class="badge bg-success bg-opacity-10 text-success px-3 py-2">
+                        <i class="bi bi-lock me-1"></i>
+                        Privado
+                    </span>
+                    <span class="badge bg-info bg-opacity-10 text-info px-3 py-2">
+                        <i class="bi bi-people me-1"></i>
+                        Colaborativo
+                    </span>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</div>

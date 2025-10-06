@@ -1,5 +1,5 @@
-import { ReturnHospital } from "../hospital/return-hospital";
-import { ReturnRole } from "../role/return-role";
+import { ReturnHospital } from "../hospital/return-hospital.model";
+import { ReturnRole } from "../role/return-role.model";
 
 export interface ReturnUser {
     id: string;

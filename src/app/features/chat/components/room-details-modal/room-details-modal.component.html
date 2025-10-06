@@ -1,0 +1,118 @@
+<h1 mat-dialog-title>Detalhes da Sala: {{ room.name }}</h1>
+
+<div mat-dialog-content>
+    @if (!isEdit) {
+        <p><strong>Nome:</strong> {{ room.name }}</p>
+        <p><strong>Descrição:</strong> {{ room.description }}</p>
+    } @else {
+        @if(isRoomAdmin){
+            <form [formGroup]="editForm" (ngSubmit)="onSubmit()" id="editForm" class="edit-form mb-3">
+                <div class="mb-3">
+                    <label for="name" class="form-label">
+                        Nome da Sala <span class="text-danger">*</span>
+                    </label>
+                    <input id="name" type="text" class="form-control" formControlName="name" />
+                    @if(editForm.get('name')?.invalid && editForm.get('name')?.touched){
+                        <div class="text-danger">
+                            @if(editForm.get('name')?.hasError('required')){
+                                Nome da sala é obrigatório.
+                            }
+                            @if(editForm.get('name')?.hasError('minlength')){
+                                Nome da sala deve ter pelo menos 3 caracteres.
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">
+                        Descrição da Sala <span class="text-danger">*</span>
+                    </label>
+                    <textarea id="description" rows="3" class="form-control" formControlName="description"></textarea>
+                    @if(editForm.get('description')?.invalid && editForm.get('description')?.touched){
+                        <div class="text-danger">
+                            @if(editForm.get('description')?.hasError('required')){
+                                Descrição é obrigatória.
+                            }
+                            @if(editForm.get('description')?.hasError('minlength')){
+                                Descrição deve ter pelo menos 5 caracteres.
+                            }
+                        </div>
+                    }
+                </div>
+            </form>
+        }
+    }
+
+    @if(isRoomAdmin){   
+        <div class="d-flex justify-content-end gap-2 mb-3">
+            @if (!isEdit) {
+            <button mat-stroked-button (click)="onEdit()">
+                <i class="bi bi-pencil"></i> Editar
+            </button>
+            } @else {
+            <button mat-stroked-button (click)="onEdit()">
+                <i class="bi bi-x-circle"></i> Cancelar
+            </button>
+            <button mat-stroked-button color="primary" type="submit" form="editForm" [disabled]="editForm.invalid">
+                <i class="bi bi-save"></i> Salvar
+            </button>
+            }
+        </div>
+    }
+    
+    <mat-divider class="my-3"></mat-divider>
+
+    <h4>Usuários na sala</h4>
+    <mat-list dense>
+        @for (user of usersInRoom; track user.id) {
+        <mat-list-item>
+            <div matListItemTitle>
+                <span>
+                    {{ user.name }} {{ room.adminId === user.id ? '(admin)' : '' }}
+                </span>
+            </div>
+
+            @if (isRoomAdmin && user.id !== room.adminId) {
+            <div matListItemMeta>
+                <button mat-icon-button color="warn" aria-label="Remover usuário" (click)="confirmRemoveUser(user)">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </div>
+            }
+        </mat-list-item>
+        }
+    </mat-list>
+
+    <mat-divider class="my-3"></mat-divider>
+
+    @if (isRoomAdmin) {
+    <h4>Adicionar Participantes à Sala</h4>
+
+    <div class="mb-2">
+        <input #searchInput class="form-control" placeholder="Buscar usuários" (keyup)="onSearch(searchInput.value)" />
+    </div>
+
+    <div class="mb-3">
+        <select class="form-select" multiple [(ngModel)]="selectedUserIds">
+            @for (user of filteredUsersNotInRoom; track user.id) {
+            <option [value]="user.id">{{ user.name }}</option>
+            }
+        </select>
+    </div>
+
+    <div class="d-flex justify-content-end mb-2">
+        <button mat-stroked-button color="primary" (click)="addUsersToRoom()">
+            Adicionar
+        </button>
+    </div>
+    }
+
+    <button mat-stroked-button color="danger" class="mt-4 w-100" (click)="leaveRoom()">
+        Sair da Sala
+    </button>
+</div>
+
+<div mat-dialog-actions class="d-flex justify-content-end">
+    <button mat-stroked-button (click)="onClose()">Fechar</button>
+</div>

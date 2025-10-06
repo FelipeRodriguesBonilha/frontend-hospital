@@ -1,0 +1,115 @@
+<div class="d-flex align-items-start justify-content-center h-100 vw-100 overflow-auto p-4">
+    <div class="container p-3 bg-white">
+        <h4>{{ isEditMode ? 'Editar Paciente' : 'Criar Paciente' }}</h4>
+        <form [formGroup]="patientForm" (ngSubmit)="onSubmit()">
+
+            @if(user.role.name === "AdminGeral"){
+            <div class="mb-3">
+                <label for="hospitalId" class="form-label">Hospital <span class="text-danger">*</span></label>
+                <select id="hospitalId" class="form-select" formControlName="hospitalId">
+                    <option value="" disabled>Selecione um hospital</option>
+                    @for(h of hospitals; track h.id){
+                    <option [value]="h.id">
+                        {{ h.companyName }}
+                    </option>
+                    }
+                </select>
+                @if(patientForm.get('hospitalId')?.invalid && patientForm.get('hospitalId')?.touched){
+                <div class="text-danger">
+                    @if(patientForm.get('hospitalId')?.hasError('required')){
+                    Hospital é obrigatório.
+                    }
+                </div>
+                }
+            </div>
+            }
+
+            <div class="mb-3">
+                <label for="name" class="form-label">Nome <span class="text-danger">*</span></label>
+                <input id="name" type="text" class="form-control" formControlName="name" />
+                @if(patientForm.get('name')?.invalid && patientForm.get('name')?.touched){
+                <div class="text-danger">
+                    @if(patientForm.get('name')?.hasError('required')){
+                    Nome é obrigatório.
+                    }
+                    @if(patientForm.get('name')?.hasError('minlength') ||
+                    patientForm.get('name')?.hasError('maxlength')){
+                    Nome deve ter entre 3 e 100 caracteres.
+                    }
+                </div>
+                }
+            </div>
+
+            <div class="mb-3">
+                <label for="cpf" class="form-label">CPF <span class="text-danger">*</span></label>
+                <input id="cpf" type="text" class="form-control" formControlName="cpf" mask="000.000.000-00"
+                    [dropSpecialCharacters]="true" inputmode="numeric" autocomplete="off" />
+                @if(patientForm.get('cpf')?.invalid && patientForm.get('cpf')?.touched){
+                <div class="text-danger">
+                    @if(patientForm.get('cpf')?.hasError('required')){
+                    CPF é obrigatório.
+                    }
+                    @if(patientForm.get('cpf')?.hasError('minlength') || patientForm.get('cpf')?.hasError('maxlength')){
+                    CPF deve conter exatamente 11 dígitos.
+                    }
+                </div>
+                }
+            </div>
+
+            <div class="mb-3">
+                <label for="phone" class="form-label">Telefone <span class="text-danger">*</span></label>
+                <input id="phone" type="text" class="form-control" formControlName="phone"
+                    mask="(00) 0000-0000||(00) 00000-0000" [dropSpecialCharacters]="true" inputmode="numeric"
+                    autocomplete="off" />
+                @if(patientForm.get('phone')?.invalid && patientForm.get('phone')?.touched){
+                <div class="text-danger">
+                    @if(patientForm.get('phone')?.hasError('required')){
+                    Telefone é obrigatório.
+                    }
+                    @if(patientForm.get('phone')?.hasError('minlength') ||
+                    patientForm.get('phone')?.hasError('maxlength')){
+                    Telefone deve conter entre 10 e 11 dígitos.
+                    }
+                </div>
+                }
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">E-mail <span class="text-danger">*</span></label>
+                <input id="email" type="email" class="form-control" formControlName="email" />
+                @if(patientForm.get('email')?.invalid && patientForm.get('email')?.touched){
+                <div class="text-danger">
+                    @if(patientForm.get('email')?.hasError('required')){
+                    E-mail é obrigatório.
+                    }
+                    @if(patientForm.get('email')?.hasError('email')){
+                    E-mail inválido.
+                    }
+                </div>
+                }
+            </div>
+
+            <div class="mb-3">
+                <label for="address" class="form-label">Endereço</label>
+                <input id="address" type="text" class="form-control" formControlName="address" />
+                @if(patientForm.get('address')?.invalid && patientForm.get('address')?.touched){
+                <div class="text-danger">
+                    @if(patientForm.get('address')?.hasError('minlength') ||
+                    patientForm.get('address')?.hasError('maxlength')){
+                    Endereço deve ter entre 3 e 100 caracteres.
+                    }
+                </div>
+                }
+            </div>
+
+            <div class="w-100 d-flex justify-content-end">
+                <button mat-stroked-button type="button" class="me-2" (click)="onCancel()">
+                    Cancelar
+                </button>
+                <button mat-stroked-button type="submit" [disabled]="patientForm.invalid">
+                    {{ isEditMode ? 'Salvar' : 'Criar' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

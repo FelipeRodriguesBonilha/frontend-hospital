@@ -1,0 +1,144 @@
+<div class="d-flex align-items-start justify-content-center h-100 vw-100 overflow-auto p-4">
+    <div class="container p-3 bg-white">
+        <h4>{{ isEditMode ? 'Editar Exame' : 'Criar Exame' }}</h4>
+        <form [formGroup]="examForm" (ngSubmit)="onSubmit()">
+
+            @if(user.role.name === "AdminGeral"){
+            <div class="mb-3">
+                <label for="hospitalId" class="form-label">Hospital <span class="text-danger">*</span></label>
+                <select id="hospitalId" class="form-select" formControlName="hospitalId">
+                    <option value="" disabled>Selecione um hospital</option>
+                    @for(h of hospitals; track h.id){
+                    <option [value]="h.id">
+                        {{ h.companyName }}
+                    </option>
+                    }
+                </select>
+                @if(examForm.get('hospitalId')?.invalid && examForm.get('hospitalId')?.touched){
+                <div class="text-danger">
+                    @if(examForm.get('hospitalId')?.hasError('required')){
+                    Hospital é obrigatório.
+                    }
+                </div>
+                }
+            </div>
+            }
+
+            <div class="mb-3">
+                <label for="providerId" class="form-label">Prestador <span class="text-danger">*</span></label>
+                <select id="providerId" class="form-select" formControlName="providerId"
+                    [disabled]="isAdminGeral && !examForm.get('hospitalId')?.value">
+                    <option value="" disabled>Selecione um usuário</option>
+                    @for(m of medics; track m.id){
+                    <option [value]="m.id">
+                        {{ m.name }}
+                    </option>
+                    }
+                </select>
+                @if(examForm.get('providerId')?.invalid && examForm.get('providerId')?.touched){
+                <div class="text-danger">
+                    @if(examForm.get('providerId')?.hasError('required')){
+                    Prestador é obrigatório.
+                    }
+                </div>
+                }
+            </div>
+
+            <div class="mb-3">
+                <label for="patientId" class="form-label">Paciente <span class="text-danger">*</span></label>
+                <select id="patientId" class="form-select" formControlName="patientId">
+                    <option value="" disabled>Selecione um paciente</option>
+                    @for(p of patients; track p.id){
+                    <option [value]="p.id">
+                        {{ p.name }}
+                    </option>
+                    }
+                </select>
+                @if(examForm.get('patientId')?.invalid && examForm.get('patientId')?.touched){
+                <div class="text-danger">
+                    @if(examForm.get('patientId')?.hasError('required')){
+                    Paciente é obrigatório.
+                    }
+                </div>
+                }
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Descrição do Exame <span
+                        class="text-danger">*</span></label>
+                <textarea id="description" rows="3" class="form-control" formControlName="description"></textarea>
+                @if(examForm.get('description')?.invalid && examForm.get('description')?.touched){
+                <div class="text-danger">
+                    @if(examForm.get('description')?.hasError('required')){
+                    Descrição é obrigatória.
+                    }
+                    @if(examForm.get('description')?.hasError('minlength') ||
+                    examForm.get('description')?.hasError('maxlength')){
+                    Descrição deve ter entre 3 e 100 caracteres.
+                    }
+                </div>
+                }
+            </div>
+
+            <div class="mb-3">
+                <label for="file" class="form-label">Arquivo do Exame</label>
+                <input type="file" id="file" class="form-control" (change)="onFileSelected($event)"
+                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp,image/svg+xml,application/pdf">
+
+                @if(fileRequiredError){
+                <div class="text-danger mt-1">
+                    Arquivo é obrigatório para criação.
+                </div>
+                }
+            </div>
+
+            @if (previewUrl) {
+                @if (getPreviewType() === 'image') {
+                    <div class="mb-3 text-center">
+                        <p class="fw-bold mb-2">Pré-visualização do exame</p>
+                        <img [src]="previewUrl" alt="Preview do exame" class="img-fluid rounded"
+                            style="max-height: 300px; object-fit: contain; transition: transform .3s ease, filter .3s ease; cursor: pointer;"
+                            onmouseover="this.style.transform='scale(1.05)'; this.style.filter='grayscale(100%)'"
+                            onmouseout="this.style.transform='scale(1)'; this.style.filter='grayscale(0%)'">
+                        <div class="mt-2 text-muted small">
+                            {{ selectedFile?.name || archive?.name }}
+                        </div>
+                    </div>
+                } @else if (getPreviewType() === 'pdf') {
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    @if (archive) {
+                        <a [href]="previewUrl" [attr.download]="archive.name"
+                            class="d-flex align-items-center justify-content-center bg-light rounded shadow-sm me-2 text-decoration-none"
+                            style="width: 48px; height: 48px;" title="Baixar PDF">
+                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-4"></i>
+                        </a>
+                    } @else {
+                        <a [href]="previewUrl" target="_blank"
+                            class="d-flex align-items-center justify-content-center bg-light rounded shadow-sm me-2 text-decoration-none"
+                            style="width: 48px; height: 48px;" title="Abrir PDF">
+                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-4"></i>
+                        </a>
+                    }
+                    <span class="text-muted">
+                        {{ selectedFile?.name || archive?.name || 'Arquivo PDF' }}
+                    </span>
+                </div>
+                } @else {
+                <div class="alert alert-secondary d-flex align-items-center gap-2">
+                    <i class="bi bi-file-earmark-text"></i>
+                    Pré-visualização indisponível. Baixe/abra o arquivo para visualizar.
+                </div>
+                }
+            }
+
+            <div class="w-100 d-flex justify-content-end">
+                <button mat-stroked-button type="button" class="me-2" (click)="onCancel()">
+                    Cancelar
+                </button>
+                <button mat-stroked-button type="submit" [disabled]="examForm.invalid || fileRequiredError">
+                    {{ isEditMode ? 'Salvar' : 'Criar' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
