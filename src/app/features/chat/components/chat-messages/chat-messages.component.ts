@@ -60,6 +60,7 @@ export class ChatMessagesComponent implements OnInit, AfterViewChecked {
     this.onRoomMessages();
     this.socketService.requestRoomMessages(this.room.id);
     this.onNewMessage();
+    this.onMessageUpdated();
     this.onMessageSeenByAll();
 
     this.socketService.roomsUser$
@@ -70,13 +71,13 @@ export class ChatMessagesComponent implements OnInit, AfterViewChecked {
       });
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges(changes: SimpleChanges) {
     if (changes['room'] && changes['room'].currentValue) {
       this.socketService.requestRoomMessages(this.room.id);
     }
   }
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -91,11 +92,21 @@ export class ChatMessagesComponent implements OnInit, AfterViewChecked {
   }
 
   onNewMessage() {
-    this.socketService.onNewMessage(message => {
+    this.socketService.onNewMessage((message) => {
       this.messages.push(message);
-      if (message.archives?.length) this.preloadImages([message]);
       this.scrollToBottom();
       this.markMessagesAsRead();
+
+      if (this.isMyMessage(message) && this.files.length > 0) {
+        this.archiveService.uploadFiles(message.id, this.files).subscribe({
+          next: () => {
+            this.clearFiles();
+          },
+          error: (err) => console.error('Erro ao enviar arquivos:', err)
+        });
+      }
+
+      if (message.archives?.length) this.preloadImages([message]);
     });
   }
 
@@ -107,11 +118,23 @@ export class ChatMessagesComponent implements OnInit, AfterViewChecked {
     });
   }
 
+  onMessageUpdated() {
+    this.socketService.onMessageUpdated((updatedMessage: ReturnMessage) => {
+      const idx = this.messages.findIndex(m => m.id === updatedMessage.id);
+      if (idx !== -1) {
+        this.messages[idx] = updatedMessage;
+        if (updatedMessage.archives?.length) {
+          this.preloadImages([updatedMessage]);
+        }
+      }
+    });
+  }
+
   ngAfterViewChecked() {
     this.scrollToBottom();
   }
 
-  scrollToBottom(): void {
+  scrollToBottom() {
     try {
       const el = this.messagesContainer.nativeElement;
       el.scrollTop = el.scrollHeight;
@@ -123,39 +146,17 @@ export class ChatMessagesComponent implements OnInit, AfterViewChecked {
     if (input.files?.length) this.files = Array.from(input.files);
   }
 
-  private fileToBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const data = reader.result as string;
-        resolve(data.split(',')[1]);
-      };
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(file);
-    });
-  }
-
-  async sendMessage(): Promise<void> {
+  async sendMessage() {
     if (!this.newMessage.trim() && this.files.length === 0) return;
-
-    const filesPayload = await Promise.all(
-      this.files.map(async (f) => ({
-        name: f.name,
-        type: f.type,
-        content: await this.fileToBase64(f)
-      }))
-    );
 
     const createMessage = {
       content: this.newMessage,
-      roomId: this.room.id,
-      files: filesPayload.length ? filesPayload : undefined
+      roomId: this.room.id
     };
 
     this.socketService.sendMessage(createMessage);
 
     this.newMessage = '';
-    this.files = [];
   }
 
   markMessagesAsRead(): void {

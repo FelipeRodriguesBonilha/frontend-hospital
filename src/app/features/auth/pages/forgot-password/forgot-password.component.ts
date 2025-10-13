@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth/auth.service';
+import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-forgot-password',
@@ -18,13 +19,15 @@ import { AuthService } from '../../../../core/services/auth/auth.service';
     MatButtonModule,
     MatIconModule,
     RouterLink,
-    MatSnackBarModule
+    MatSnackBarModule,
+    LoadingComponent
   ],
   templateUrl: './forgot-password.component.html',
   styleUrls: ['./forgot-password.component.css'],
 })
 export class ForgotPasswordComponent {
   forgotForm: FormGroup;
+  isLoading = false;
 
   constructor(
     private fb: FormBuilder,
@@ -45,8 +48,10 @@ export class ForgotPasswordComponent {
 
     const formValue = this.forgotForm.value;
 
+    this.isLoading = true;
     this.authService.forgotPassword(formValue).subscribe({
       next: () => {
+        this.isLoading = false;
         const message = 'Instruções enviadas por e-mail!';
 
         this.snackBar.open(message, 'Fechar', {
@@ -59,6 +64,7 @@ export class ForgotPasswordComponent {
         this.router.navigate(['/login']);
       },
       error: (err) => {
+        this.isLoading = false;
         const errorMessage = err?.error?.message || 'Erro inesperado. Tente novamente!';
 
         this.snackBar.open(errorMessage, 'Fechar', {

@@ -1,3 +1,5 @@
+<app-loading [show]="isLoading" message="Carregando..."></app-loading>
+
 <div class="d-flex align-items-start justify-content-center h-100 vw-100 overflow-auto p-4">
     <div class="container p-3 bg-white">
         <h4>{{ isEditMode ? 'Editar Usuário' : 'Criar Usuário' }}</h4>
@@ -111,7 +113,7 @@
                     <option value="" disabled>Selecione um papel</option>
                     @for(r of roles; track r.id){
                     <option [value]="r.id">
-                        {{ r.name }}
+                        {{ getRoleName(r.name) }}
                     </option>
                     }
                 </select>

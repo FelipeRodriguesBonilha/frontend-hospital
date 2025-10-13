@@ -193,6 +193,20 @@ export class SocketService {
     });
   }
 
+  onMessageCreated(callback: (message: ReturnMessage) => void): void {
+    this.socket.off('message-created');
+    this.socket.on('message-created', (message) => {
+      callback(message);
+    });
+  }
+
+  onMessageUpdated(callback: (message: ReturnMessage) => void): void {
+    this.socket.off('message-updated');
+    this.socket.on('message-updated', (message) => {
+      callback(message);
+    });
+  }
+
   onError(callback: (error: { message: string }) => void): void {
     this.socket.off('error');
     this.socket.on('error', (error) => {

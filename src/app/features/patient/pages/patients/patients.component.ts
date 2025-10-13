@@ -18,6 +18,7 @@ import { PatientService } from '../../../../core/services/patient/patient.servic
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { CpfPipe } from '../../../../shared/pipes/cpf.pipe';
 import { PhonePipe } from '../../../../shared/pipes/phone.pipe';
+import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-patients',
@@ -33,7 +34,8 @@ import { PhonePipe } from '../../../../shared/pipes/phone.pipe';
     MatSnackBarModule,
     MatPaginatorModule,
     CpfPipe,
-    PhonePipe
+    PhonePipe,
+    LoadingComponent
   ],
   templateUrl: './patients.component.html',
   styleUrl: './patients.component.css'
@@ -50,6 +52,7 @@ export class PatientsComponent {
   totalItems = 0;
   pageSize = 10;
   pageIndex = 0;
+  isLoading = false;
 
   constructor(
     private patientService: PatientService,
@@ -77,6 +80,7 @@ export class PatientsComponent {
       distinctUntilChanged(),
       switchMap((term) => {
         this.pageIndex = 0;
+        this.isLoading = true;
         if (this.rolesLoadUsers.includes(this.user.role.name)) {
           return this.patientService.findAllPatients({
             name: term || '',
@@ -100,12 +104,17 @@ export class PatientsComponent {
         this.totalItems = response.total;
         this.pageIndex = response.page - 1;
         this.pageSize = response.limit;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
   }
 
   loadPatients() {
+    this.isLoading = true;
     this.patientService.findAllPatients({
       name: this.searchControl.value || '',
       page: this.pageIndex + 1,
@@ -117,12 +126,17 @@ export class PatientsComponent {
         this.totalItems = response.total;
         this.pageIndex = response.page - 1;
         this.pageSize = response.limit;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
   }
 
   loadPatientsByHospital() {
+    this.isLoading = true;
     this.patientService.findPatientsByHospital(this.user.hospitalId!, {
       name: this.searchControl.value || '',
       page: this.pageIndex + 1,
@@ -134,19 +148,24 @@ export class PatientsComponent {
         this.totalItems = response.total;
         this.pageIndex = response.page - 1;
         this.pageSize = response.limit;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
   }
 
   onPageChange(event: PageEvent) {
     this.pageIndex = event.pageIndex;
     this.pageSize = event.pageSize;
-
-    if (this.rolesLoadUsers.includes(this.user.role.name)) {
-      this.loadPatients();
-    } else if (this.rolesLoadUsersByHospital.includes(this.user.role.name)) {
-      this.loadPatientsByHospital();
+    if (this.rolesLoadUsers.includes(this.user.role.name)) this.loadPatients();
+    else if (this.rolesLoadUsersByHospital.includes(this.user.role.name)) this.loadPatientsByHospital();
+    else {
+      this.patients = [];
+      this.filteredPatients = [];
+      this.isLoading = false;
     }
   }
 
@@ -168,6 +187,7 @@ export class PatientsComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
+        this.isLoading = true;
         this.patientService.deletePatient(patient.id).subscribe({
           next: () => {
             this.snackBar.open('Paciente excluído com sucesso.', 'Fechar', {
@@ -180,9 +200,13 @@ export class PatientsComponent {
             else {
               this.patients = [];
               this.filteredPatients = [];
+              this.isLoading = false;
             }
           },
-          error: (err: HttpErrorResponse) => this.showError(err)
+          error: (err: HttpErrorResponse) => {
+            this.isLoading = false;
+            this.showError(err);
+          }
         });
       }
     });

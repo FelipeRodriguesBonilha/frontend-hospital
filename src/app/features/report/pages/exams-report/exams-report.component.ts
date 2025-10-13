@@ -10,6 +10,7 @@ import { debounceTime } from 'rxjs';
 import { ReturnPaginated } from '../../../../core/models/pagination/return-paginated.model';
 import { ReturnExamsReport } from '../../../../core/models/report/return-exams-report.model';
 import { ReportService } from '../../../../core/services/report/report.service';
+import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-exams-report',
@@ -21,7 +22,8 @@ import { ReportService } from '../../../../core/services/report/report.service';
     MatPaginatorModule,
     MatIconModule,
     MatButtonModule,
-    DatePipe
+    DatePipe,
+    LoadingComponent
   ],
   templateUrl: './exams-report.component.html',
   styleUrls: ['./exams-report.component.css']
@@ -35,6 +37,7 @@ export class ExamsReportComponent {
   totalItems = 0;
   pageSize = 10;
   pageIndex = 0;
+  isLoading = false;
 
   constructor(
     private reportService: ReportService,
@@ -49,6 +52,7 @@ export class ExamsReportComponent {
   }
 
   loadReports() {
+    this.isLoading = true;
     this.loadReportsObservable().subscribe({
       next: (response: ReturnPaginated<ReturnExamsReport>) => this.updateReports(response),
       error: (err: HttpErrorResponse) => this.showError(err)
@@ -73,6 +77,7 @@ export class ExamsReportComponent {
     this.totalItems = response.total;
     this.pageIndex = response.page - 1;
     this.pageSize = response.limit;
+    this.isLoading = false;
   }
 
   onPageChange(event: PageEvent) {
@@ -82,6 +87,7 @@ export class ExamsReportComponent {
   }
 
   showError(err: HttpErrorResponse) {
+    this.isLoading = false;
     const errorMessage = err?.error?.message || 'Erro inesperado. Tente novamente.';
     this.snackBar.open(errorMessage, 'Fechar', {
       duration: 5000,

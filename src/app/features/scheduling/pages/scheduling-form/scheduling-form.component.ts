@@ -16,6 +16,7 @@ import { HospitalService } from '../../../../core/services/hospital/hospital.ser
 import { PatientService } from '../../../../core/services/patient/patient.service';
 import { SchedulingService } from '../../../../core/services/scheduling/scheduling.service';
 import { UserService } from '../../../../core/services/user/user.service';
+import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-scheduling-form',
@@ -25,7 +26,8 @@ import { UserService } from '../../../../core/services/user/user.service';
     ReactiveFormsModule,
     RouterModule,
     MatButtonModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    LoadingComponent
   ],
   templateUrl: './scheduling-form.component.html',
   styleUrl: './scheduling-form.component.css',
@@ -37,6 +39,7 @@ export class SchedulingFormComponent {
   schedulingId: string | null = null;
   isEditMode = false;
   isAdminGeral = false;
+  isLoading = false;
 
   hospitals: ReturnHospital[] = [];
   medics: ReturnUser[] = [];
@@ -104,11 +107,16 @@ export class SchedulingFormComponent {
 
 
   loadHospitals() {
+    this.isLoading = true;
     this.hospitalService.findAllHospitals({}).subscribe({
       next: (response: ReturnPaginated<ReturnHospital>) => {
         this.hospitals = response.data;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     })
   }
 
@@ -117,24 +125,35 @@ export class SchedulingFormComponent {
     roles: string[],
     target: 'medics'
   ) {
+    this.isLoading = true;
     this.userService.findUsersByHospital(hospitalId, { roles: roles }).subscribe({
       next: (response: ReturnPaginated<ReturnUser>) => {
         this[target] = response.data;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
   }
 
   loadPatients(hospitalId: string) {
+    this.isLoading = true;
     this.patientService.findPatientsByHospital(hospitalId, {}).subscribe({
       next: (response: ReturnPaginated<ReturnPatient>) => {
         this.patients = response.data;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     })
   }
 
   loadScheduling(id: string): void {
+    this.isLoading = true;
     this.schedulingService.findSchedulingById(id).subscribe({
       next: (scheduling: ReturnScheduling) => {
         this.schedulingForm.patchValue({
@@ -146,8 +165,10 @@ export class SchedulingFormComponent {
           startDate: this.datePipe.transform(scheduling.startDate, 'yyyy-MM-ddTHH:mm'),
           endDate: this.datePipe.transform(scheduling.endDate, 'yyyy-MM-ddTHH:mm'),
         });
+        this.isLoading = false;
       },
       error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
         this.showError(err)
         this.router.navigate(['/schedulings']);
       }
@@ -167,6 +188,8 @@ export class SchedulingFormComponent {
       hospitalId: this.isAdminGeral ? this.schedulingForm.get('hospitalId')?.value : this.user.hospitalId
     };
 
+    this.isLoading = true;
+
     if (this.isEditMode && this.schedulingId) {
       let updateDto = formValue;
 
@@ -176,13 +199,25 @@ export class SchedulingFormComponent {
       }
 
       this.schedulingService.updateScheduling(this.schedulingId, updateDto).subscribe({
-        next: () => this.router.navigate(['/schedulings']),
-        error: (err: HttpErrorResponse) => this.showError(err)
+        next: () => {
+          this.isLoading = false;
+          this.router.navigate(['/schedulings']);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.isLoading = false;
+          this.showError(err);
+        }
       });
     } else {
       this.schedulingService.createScheduling(formValue).subscribe({
-        next: () => this.router.navigate(['/schedulings']),
-        error: (err: HttpErrorResponse) => this.showError(err)
+        next: () => {
+          this.isLoading = false;
+          this.router.navigate(['/schedulings']);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.isLoading = false;
+          this.showError(err);
+        }
       });
     }
   }

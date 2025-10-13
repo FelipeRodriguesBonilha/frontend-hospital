@@ -11,6 +11,7 @@ import { Role } from '../../../../core/enums/role.enum';
 import { LoginPayload } from '../../../../core/models/auth/login-payload.model';
 import { ReturnLogin } from '../../../../core/models/auth/return-login.model';
 import { AuthService } from '../../../../core/services/auth/auth.service';
+import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-login',
@@ -23,7 +24,8 @@ import { AuthService } from '../../../../core/services/auth/auth.service';
     MatButtonModule,
     MatIconModule,
     RouterLink,
-    MatSnackBarModule
+    MatSnackBarModule,
+    LoadingComponent
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
@@ -31,6 +33,7 @@ import { AuthService } from '../../../../core/services/auth/auth.service';
 export class LoginComponent {
   loginForm: FormGroup;
   showPassword: boolean = false;
+  isLoading = false;
 
   constructor(
     private fb: FormBuilder,
@@ -49,8 +52,10 @@ export class LoginComponent {
   }
 
   onSubmit() {
+    this.isLoading = true;
     this.authService.login((this.loginForm.value) as LoginPayload).subscribe({
       next: (login: ReturnLogin) => {
+        this.isLoading = false;
         if (login.user.role.name as Role === Role.AdministradorGeral) {
           this.router.navigate(['/hospitals'])
         } else if (
@@ -62,6 +67,7 @@ export class LoginComponent {
         }
       },
       error: (err) => {
+        this.isLoading = false;
         const errorMessage = err?.error?.message || 'Erro inesperado. Tente novamente.';
 
         this.snackBar.open(errorMessage, 'Fechar', {

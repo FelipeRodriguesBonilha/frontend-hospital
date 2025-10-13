@@ -8,16 +8,16 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
-import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { ReturnPaginated } from '../../../../core/models/pagination/return-paginated.model';
 import { ReturnUser } from '../../../../core/models/user/return-user.model';
 import { AuthService } from '../../../../core/services/auth/auth.service';
+import { SocketService } from '../../../../core/services/socket/socket.service';
 import { UserService } from '../../../../core/services/user/user.service';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
+import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
 import { CpfPipe } from '../../../../shared/pipes/cpf.pipe';
 import { PhonePipe } from '../../../../shared/pipes/phone.pipe';
-import { SocketService } from '../../../../core/services/socket/socket.service';
 
 
 @Component({
@@ -26,7 +26,6 @@ import { SocketService } from '../../../../core/services/socket/socket.service';
   imports: [
     FormsModule,
     ReactiveFormsModule,
-    NgbDropdownModule,
     MatMenuModule,
     RouterLink,
     MatIconModule,
@@ -34,7 +33,8 @@ import { SocketService } from '../../../../core/services/socket/socket.service';
     MatSnackBarModule,
     MatPaginatorModule,
     CpfPipe,
-    PhonePipe
+    PhonePipe,
+    LoadingComponent
   ],
   templateUrl: './users.component.html',
   styleUrl: './users.component.css'
@@ -51,6 +51,7 @@ export class UsersComponent {
   totalItems = 0;
   pageSize = 10;
   pageIndex = 0;
+  isLoading = false;
 
   constructor(
     private userService: UserService,
@@ -78,6 +79,7 @@ export class UsersComponent {
       debounceTime(300),
       distinctUntilChanged(),
       switchMap((term) => {
+        this.isLoading = true;
         if (this.rolesLoadUsers.includes(this.user.role.name)) {
           return this.userService.findAllUsers({
             name: term || '',
@@ -101,8 +103,12 @@ export class UsersComponent {
         this.totalItems = response.total;
         this.pageIndex = response.page - 1;
         this.pageSize = response.limit;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
 
     this.socketService.onUserDeleted((deletedUser: ReturnUser) => {
@@ -121,6 +127,7 @@ export class UsersComponent {
   }
 
   loadUsers() {
+    this.isLoading = true;
     this.userService.findAllUsers({
       name: this.searchControl.value || '',
       page: this.pageIndex + 1,
@@ -132,12 +139,17 @@ export class UsersComponent {
         this.totalItems = response.total;
         this.pageIndex = response.page - 1;
         this.pageSize = response.limit;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
   }
 
   loadUsersByHospital() {
+    this.isLoading = true;
     this.userService.findUsersByHospital(this.user.hospitalId!, {
       name: this.searchControl.value || '',
       page: this.pageIndex + 1,
@@ -149,8 +161,12 @@ export class UsersComponent {
         this.totalItems = response.total;
         this.pageIndex = response.page - 1;
         this.pageSize = response.limit;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
   }
 
@@ -183,12 +199,20 @@ export class UsersComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
+        this.isLoading = true;
         this.socketService.deleteUser(user.id);
         this.userService.deleteUser(user.id).subscribe({
           next: () => {
-
+            this.snackBar.open('Usuário excluído com sucesso.', 'Fechar', {
+              duration: 3000,
+              verticalPosition: 'top'
+            });
+            this.isLoading = false;
           },
-          error: (err: HttpErrorResponse) => this.showError(err)
+          error: (err: HttpErrorResponse) => {
+            this.isLoading = false;
+            this.showError(err);
+          }
         });
       }
     });

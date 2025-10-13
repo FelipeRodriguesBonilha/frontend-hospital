@@ -16,6 +16,7 @@ import { CnpjPipe } from '../../../../shared/pipes/cnpj.pipe';
 import { PhonePipe } from '../../../../shared/pipes/phone.pipe';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { MatDialog } from '@angular/material/dialog';
+import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-hospitals',
@@ -31,7 +32,8 @@ import { MatDialog } from '@angular/material/dialog';
     MatSnackBarModule,
     MatPaginatorModule,
     CnpjPipe,
-    PhonePipe
+    PhonePipe,
+    LoadingComponent
   ],
   templateUrl: './hospitals.component.html',
   styleUrl: './hospitals.component.css'
@@ -44,6 +46,7 @@ export class HospitalsComponent {
   totalItems = 0;
   pageSize = 10;
   pageIndex = 0;
+  isLoading = false;
 
   constructor(
     private hospitalService: HospitalService,
@@ -57,13 +60,14 @@ export class HospitalsComponent {
     this.searchControl.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
-      switchMap((term) =>
-        this.hospitalService.findAllHospitals({
+      switchMap((term) => {
+        this.isLoading = true;
+        return this.hospitalService.findAllHospitals({
           companyName: term || '',
           page: this.pageIndex + 1,
           limit: this.pageSize
-        })
-      )
+        });
+      })
     ).subscribe({
       next: (response: ReturnPaginated<ReturnHospital>) => {
         this.hospitals = response.data;
@@ -71,12 +75,17 @@ export class HospitalsComponent {
         this.totalItems = response.total;
         this.pageIndex = response.page - 1;
         this.pageSize = response.limit;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
   }
 
   loadHospitals() {
+    this.isLoading = true;
     this.hospitalService.findAllHospitals({
       companyName: this.searchControl.value || '',
       page: this.pageIndex + 1,
@@ -88,8 +97,12 @@ export class HospitalsComponent {
         this.totalItems = response.total;
         this.pageIndex = response.page - 1;
         this.pageSize = response.limit;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
   }
 
@@ -117,6 +130,7 @@ export class HospitalsComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
+        this.isLoading = true;
         this.hospitalService.deleteHospital(hospital.id).subscribe({
           next: () => {
             this.snackBar.open('Hospital excluído com sucesso.', 'Fechar', {
@@ -126,7 +140,10 @@ export class HospitalsComponent {
 
             this.loadHospitals()
           },
-          error: (err: HttpErrorResponse) => this.showError(err)
+          error: (err: HttpErrorResponse) => {
+            this.isLoading = false;
+            this.showError(err);
+          }
         });
       }
     });

@@ -9,6 +9,7 @@ import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { ReturnUser } from '../../../../core/models/user/return-user.model';
 import { AuthService } from '../../../../core/services/auth/auth.service';
 import { SocketService } from '../../../../core/services/socket/socket.service';
+import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-profile-edit',
@@ -19,7 +20,8 @@ import { SocketService } from '../../../../core/services/socket/socket.service';
     RouterModule,
     MatButtonModule,
     MatSnackBarModule,
-    NgxMaskDirective
+    NgxMaskDirective,
+    LoadingComponent
   ],
   providers: [provideNgxMask({ dropSpecialCharacters: true })],
   templateUrl: './profile-edit.component.html',
@@ -28,6 +30,7 @@ import { SocketService } from '../../../../core/services/socket/socket.service';
 export class ProfileEditComponent {
   user!: ReturnUser;
   profileForm!: FormGroup;
+  isLoading = false;
 
   constructor(
     private fb: FormBuilder,
@@ -49,6 +52,7 @@ export class ProfileEditComponent {
         });
 
         this.socketService.onUserUpdated((updatedUser: ReturnUser) => {
+          this.isLoading = false;
           this.authService.updateCurrentUser(updatedUser);
           this.snackBar.open('Perfil atualizado com sucesso!', 'Fechar', { duration: 3000 });
         });
@@ -61,6 +65,8 @@ export class ProfileEditComponent {
       this.profileForm.markAllAsTouched();
       return;
     }
+
+    this.isLoading = true;
 
     const updateDto = this.profileForm.value;
     this.socketService.updateProfile(updateDto);

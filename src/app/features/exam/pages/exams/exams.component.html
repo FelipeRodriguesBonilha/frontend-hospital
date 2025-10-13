@@ -1,10 +1,12 @@
+<app-loading [show]="isLoading" message="Carregando exames..."></app-loading>
+
 <div class="d-flex flex-column h-100 vw-100">
     <div class="d-flex justify-content-between align-items-center p-3 border-bottom bg-light vw-100">
         <h4 class="mb-0 text-primary fw-semibold">
             <i class="bi bi-archive me-2"></i>Exames
         </h4>
         <button mat-stroked-button type="button" [routerLink]="'/exams/create'">
-            Adicionar Exames
+            Criar Exame
         </button>
     </div>
 
@@ -42,16 +44,15 @@
                             </small>
                             <small class="text-muted d-flex align-items-center">
                                 <i class="bi bi-person-fill me-1"></i>
-                                <span class="text-truncate">Usuário que criou o exame: {{ exam.createdBy?.name }}</span>
+                                <span class="text-truncate">Usuário que criou o exame: {{ exam.createdBy?.name || 'Usuário não cadastrado' }}</span>
                             </small>
                             <small class="text-muted d-flex align-items-center">
                                 <i class="bi bi-person-badge me-1"></i>
-                                <span class="text-truncate">Médico que irá realizar o exame: {{ exam.provider?.name
-                                    }}</span>
+                                <span class="text-truncate">Médico que irá realizar o exame: {{ exam.provider?.name || 'Médico não cadastrado' }}</span>
                             </small>
                             <small class="text-muted d-flex align-items-center">
                                 <i class="bi bi-person-vcard-fill me-1"></i>
-                                <span class="text-truncate">Paciente: {{ exam.patient?.name }}</span>
+                                <span class="text-truncate">Paciente: {{ exam.patient?.name || 'Paciente não cadastrado' }}</span>
                             </small>
                         </div>
                     </div>
@@ -82,9 +83,7 @@
                 <i class="bi bi-archive display-1 mb-3 opacity-50"></i>
                 <h4 class="fw-semibold">{{searchControl.value ? 'Nenhum exame encontrado' : 'Nenhum exame cadastrado'}}
                 </h4>
-                <p class="small mb-0">{{searchControl.value ? 'Tente ajustar os termos de busca.' : 'Não há exames
-                    cadastrados
-                    no sistema no momento.'}}</p>
+                <p class="small mb-0">{{searchControl.value ? 'Tente ajustar os termos de busca.' : 'Não há exames cadastrados no sistema no momento.'}}</p>
             </div>
         </div>
         }

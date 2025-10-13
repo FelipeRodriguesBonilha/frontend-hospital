@@ -17,6 +17,7 @@ import { ReturnUser } from '../../../../core/models/user/return-user.model';
 import { AuthService } from '../../../../core/services/auth/auth.service';
 import { SchedulingService } from '../../../../core/services/scheduling/scheduling.service';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
+import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-schedulings',
@@ -31,7 +32,8 @@ import { ConfirmationModalComponent } from '../../../../shared/components/confir
     MatButtonModule,
     DatePipe,
     MatSnackBarModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    LoadingComponent
   ],
   templateUrl: './schedulings.component.html',
   styleUrl: './schedulings.component.css'
@@ -48,6 +50,7 @@ export class SchedulingsComponent {
   totalItems = 0;
   pageSize = 10;
   pageIndex = 0;
+  isLoading = false;
 
   constructor(
     private schedulingService: SchedulingService,
@@ -74,6 +77,7 @@ export class SchedulingsComponent {
       debounceTime(300),
       distinctUntilChanged(),
       switchMap((term) => {
+        this.isLoading = true;
         if (this.rolesLoadSchedulings.includes(this.user.role.name)) {
           return this.schedulingService.findAllSchedulings({
             namePatient: term || '',
@@ -97,12 +101,17 @@ export class SchedulingsComponent {
         this.totalItems = response.total;
         this.pageIndex = response.page - 1;
         this.pageSize = response.limit;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
   }
 
   loadSchedulings() {
+    this.isLoading = true;
     this.schedulingService.findAllSchedulings({
       page: this.pageIndex + 1,
       limit: this.pageSize
@@ -113,12 +122,17 @@ export class SchedulingsComponent {
         this.totalItems = response.total;
         this.pageIndex = response.page - 1;
         this.pageSize = response.limit;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
   }
 
   loadSchedulingsByHospital() {
+    this.isLoading = true;
     this.schedulingService.findSchedulingsByHospital(this.user.hospitalId!, {
       page: this.pageIndex + 1,
       limit: this.pageSize
@@ -129,19 +143,24 @@ export class SchedulingsComponent {
         this.totalItems = response.total;
         this.pageIndex = response.page - 1;
         this.pageSize = response.limit;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
   }
 
   onPageChange(event: PageEvent) {
     this.pageIndex = event.pageIndex;
     this.pageSize = event.pageSize;
-
-    if (this.rolesLoadSchedulings.includes(this.user.role.name)) {
-      this.loadSchedulings();
-    } else if (this.rolesLoadSchedulingsByHospital.includes(this.user.role.name)) {
-      this.loadSchedulingsByHospital();
+    if (this.rolesLoadSchedulings.includes(this.user.role.name)) this.loadSchedulings();
+    else if (this.rolesLoadSchedulingsByHospital.includes(this.user.role.name)) this.loadSchedulingsByHospital();
+    else {
+      this.schedulings = [];
+      this.filteredSchedulings = [];
+      this.isLoading = false;
     }
   }
 
@@ -163,6 +182,7 @@ export class SchedulingsComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
+        this.isLoading = true;
         this.schedulingService.deleteScheduling(scheduling.id).subscribe({
           next: () => {
             this.snackBar.open('Agendamento excluído com sucesso.', 'Fechar', {
@@ -175,9 +195,13 @@ export class SchedulingsComponent {
             else {
               this.schedulings = [];
               this.filteredSchedulings = [];
+              this.isLoading = false;
             }
           },
-          error: (err: HttpErrorResponse) => this.showError(err)
+          error: (err: HttpErrorResponse) => {
+            this.isLoading = false;
+            this.showError(err);
+          }
         });
       }
     });

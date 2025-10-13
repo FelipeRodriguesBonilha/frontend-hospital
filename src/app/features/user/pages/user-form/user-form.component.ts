@@ -15,6 +15,7 @@ import { HospitalService } from '../../../../core/services/hospital/hospital.ser
 import { RoleService } from '../../../../core/services/role/role.service';
 import { SocketService } from '../../../../core/services/socket/socket.service';
 import { UserService } from '../../../../core/services/user/user.service';
+import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-user-form',
@@ -25,7 +26,8 @@ import { UserService } from '../../../../core/services/user/user.service';
     RouterModule,
     MatButtonModule,
     MatSnackBarModule,
-    NgxMaskDirective
+    NgxMaskDirective,
+    LoadingComponent
   ],
   providers: [provideNgxMask({ dropSpecialCharacters: true })],
   templateUrl: './user-form.component.html',
@@ -37,6 +39,7 @@ export class UserFormComponent {
   userId: string | null = null;
   isEditMode = false;
   isAdminGeral = false;
+  isLoading = false;
 
   hospitals: ReturnHospital[] = [];
   roles: ReturnRole[] = [];
@@ -60,6 +63,7 @@ export class UserFormComponent {
         this.isEditMode = !!this.userId;
 
         this.socketService.onUserCreated((user) => {
+          this.isLoading = false;
           this.snackBar.open('Usuário criado com sucesso!', 'Fechar', { duration: 3000 });
           this.router.navigate(['/users']);
         });
@@ -69,6 +73,7 @@ export class UserFormComponent {
             this.authService.updateCurrentUser(updatedUser);
           }
 
+          this.isLoading = false;
           this.snackBar.open('Usuário atualizado com sucesso!', 'Fechar', { duration: 3000 });
           this.router.navigate(['/users']);
         });
@@ -98,24 +103,35 @@ export class UserFormComponent {
   }
 
   loadHospitals() {
+    this.isLoading = true;
     this.hospitalService.findAllHospitals({}).subscribe({
       next: (response: ReturnPaginated<ReturnHospital>) => {
         this.hospitals = response.data;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     })
   }
 
   loadRoles() {
+    this.isLoading = true;
     this.roleService.findAllRoles().subscribe({
       next: (roles: ReturnRole[]) => {
         this.roles = roles;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     })
   }
 
   loadUser(id: string): void {
+    this.isLoading = true;
     this.userService.findUserById(id).subscribe({
       next: (user) => {
         this.userForm.patchValue({
@@ -126,8 +142,10 @@ export class UserFormComponent {
           email: user.email,
           roleId: user.roleId
         });
+        this.isLoading = false;
       },
       error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
         this.showError(err)
         this.router.navigate(['/users']);
       }
@@ -170,10 +188,27 @@ export class UserFormComponent {
       dto = rest;
     }
 
+    this.isLoading = true;
+
     if (this.isEditMode && this.userId) {
       this.socketService.updateUser(this.userId, dto);
     } else {
       this.socketService.createUser(dto);
+    }
+  }
+
+  getRoleName(roleName: string): string {
+    switch(roleName){
+      case 'AdminGeral':
+        return 'Admin Geral';
+      case 'AdminHospital':
+        return 'Admin Hospital';
+      case 'Medico':
+        return 'Médico';
+      case 'Recepcionista':
+        return 'Recepcionista';
+      default:
+        return roleName;
     }
   }
 

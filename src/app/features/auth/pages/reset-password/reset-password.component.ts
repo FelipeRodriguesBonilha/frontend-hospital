@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth/auth.service';
+import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-reset-password',
@@ -18,7 +19,8 @@ import { AuthService } from '../../../../core/services/auth/auth.service';
     MatButtonModule,
     MatIconModule,
     RouterLink,
-    MatSnackBarModule
+    MatSnackBarModule,
+    LoadingComponent
   ],
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.css'],
@@ -26,6 +28,7 @@ import { AuthService } from '../../../../core/services/auth/auth.service';
 export class ResetPasswordComponent implements OnInit {
   resetForm: FormGroup;
   token: string = '';
+  isLoading = false;
 
   constructor(
     private fb: FormBuilder,
@@ -58,8 +61,10 @@ export class ResetPasswordComponent implements OnInit {
 
     const { password } = this.resetForm.value;
 
+    this.isLoading = true;
     this.authService.resetPassword({ token: this.token, newPassword: password }).subscribe({
       next: () => {
+        this.isLoading = false;
         const message = 'Senha redefinida com sucesso!';
 
         this.snackBar.open(message, 'Fechar', {
@@ -72,6 +77,7 @@ export class ResetPasswordComponent implements OnInit {
         this.router.navigate(['/login']);
       },
       error: (err) => {
+        this.isLoading = false;
         const errorMessage = err?.error?.message || 'Erro inesperado. Tente novamente.';
 
         this.snackBar.open(errorMessage, 'Fechar', {

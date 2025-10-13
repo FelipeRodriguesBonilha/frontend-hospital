@@ -16,6 +16,7 @@ import { AuthService } from '../../../../core/services/auth/auth.service';
 import { ExamService } from '../../../../core/services/exam/exam.service';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { MatDialog } from '@angular/material/dialog';
+import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-exams',
@@ -29,7 +30,8 @@ import { MatDialog } from '@angular/material/dialog';
     MatIconModule,
     MatButtonModule,
     MatSnackBarModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    LoadingComponent
   ],
   templateUrl: './exams.component.html',
   styleUrl: './exams.component.css'
@@ -46,6 +48,7 @@ export class ExamsComponent {
   totalItems = 0;
   pageSize = 10;
   pageIndex = 0;
+  isLoading = false;
 
   constructor(
     private examService: ExamService,
@@ -72,6 +75,7 @@ export class ExamsComponent {
       debounceTime(300),
       distinctUntilChanged(),
       switchMap((term) => {
+        this.isLoading = true;
         if (this.rolesLoadExams.includes(this.user.role.name)) {
           return this.examService.findAllExams({
             description: term || '',
@@ -95,12 +99,17 @@ export class ExamsComponent {
         this.totalItems = response.total;
         this.pageIndex = response.page - 1;
         this.pageSize = response.limit;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
   }
 
   loadExams() {
+    this.isLoading = true;
     this.examService.findAllExams({
       description: this.searchControl.value || '',
       page: this.pageIndex + 1,
@@ -112,12 +121,17 @@ export class ExamsComponent {
         this.totalItems = response.total;
         this.pageIndex = response.page - 1;
         this.pageSize = response.limit;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
   }
 
   loadExamsByHospital() {
+    this.isLoading = true;
     this.examService.findExamsByHospital(this.user.hospitalId!, {
       description: this.searchControl.value || '',
       page: this.pageIndex + 1,
@@ -129,8 +143,12 @@ export class ExamsComponent {
         this.totalItems = response.total;
         this.pageIndex = response.page - 1;
         this.pageSize = response.limit;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
   }
 
@@ -163,6 +181,7 @@ export class ExamsComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
+        this.isLoading = true;
         this.examService.deleteExam(exam.id).subscribe({
           next: () => {
             this.snackBar.open('Exame excluído com sucesso.', 'Fechar', {
@@ -175,9 +194,13 @@ export class ExamsComponent {
             else {
               this.exams = [];
               this.filteredExams = [];
+              this.isLoading = false;
             }
           },
-          error: (err: HttpErrorResponse) => this.showError(err)
+          error: (err: HttpErrorResponse) => {
+            this.isLoading = false;
+            this.showError(err);
+          }
         });
       }
     });

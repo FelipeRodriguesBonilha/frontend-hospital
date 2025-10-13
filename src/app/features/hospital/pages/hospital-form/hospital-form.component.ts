@@ -7,6 +7,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { HospitalService } from '../../../../core/services/hospital/hospital.service';
+import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-hospital-form',
@@ -17,7 +18,8 @@ import { HospitalService } from '../../../../core/services/hospital/hospital.ser
     RouterModule,
     MatButtonModule,
     MatSnackBarModule,
-    NgxMaskDirective
+    NgxMaskDirective,
+    LoadingComponent
   ],
   templateUrl: './hospital-form.component.html',
   styleUrls: ['./hospital-form.component.css'],
@@ -27,6 +29,7 @@ export class HospitalFormComponent implements OnInit {
   hospitalForm!: FormGroup;
   hospitalId: string | null = null;
   isEditMode = false;
+  isLoading = false;
 
   constructor(
     private fb: FormBuilder,
@@ -52,6 +55,7 @@ export class HospitalFormComponent implements OnInit {
   }
 
   private loadHospital(id: string): void {
+    this.isLoading = true;
     this.hospitalService.findHospitalById(id).subscribe({
       next: hospital => {
         this.hospitalForm.patchValue({
@@ -59,8 +63,10 @@ export class HospitalFormComponent implements OnInit {
           cnpj: hospital.cnpj,
           phone: hospital.phone,
         });
+        this.isLoading = false;
       },
       error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
         this.showError(err)
         this.router.navigate(['/hospitals']);
       }
@@ -75,15 +81,29 @@ export class HospitalFormComponent implements OnInit {
 
     const formValue = this.hospitalForm.value;
 
+    this.isLoading = true;
+
     if (this.isEditMode && this.hospitalId) {
       this.hospitalService.updateHospital(this.hospitalId, formValue).subscribe({
-        next: () => this.router.navigate(['/hospitals']),
-        error: (err: HttpErrorResponse) => this.showError(err)
+        next: () => {
+          this.isLoading = false;
+          this.router.navigate(['/hospitals']);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.isLoading = false;
+          this.showError(err);
+        }
       });
     } else {
       this.hospitalService.createHospital(formValue).subscribe({
-        next: () => this.router.navigate(['/hospitals']),
-        error: (err: HttpErrorResponse) => this.showError(err)
+        next: () => {
+          this.isLoading = false;
+          this.router.navigate(['/hospitals']);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.isLoading = false;
+          this.showError(err);
+        }
       });
     }
   }

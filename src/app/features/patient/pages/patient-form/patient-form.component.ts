@@ -13,6 +13,7 @@ import { ReturnUser } from '../../../../core/models/user/return-user.model';
 import { AuthService } from '../../../../core/services/auth/auth.service';
 import { HospitalService } from '../../../../core/services/hospital/hospital.service';
 import { PatientService } from '../../../../core/services/patient/patient.service';
+import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-patient-form',
@@ -23,7 +24,8 @@ import { PatientService } from '../../../../core/services/patient/patient.servic
     RouterModule,
     MatButtonModule,
     MatSnackBarModule,
-    NgxMaskDirective
+    NgxMaskDirective,
+    LoadingComponent
   ],
   providers: [provideNgxMask({ dropSpecialCharacters: true })],
   templateUrl: './patient-form.component.html',
@@ -35,6 +37,7 @@ export class PatientFormComponent {
   patientId: string | null = null;
   isEditMode = false;
   isAdminGeral = false;
+  isLoading = false;
 
   hospitals: ReturnHospital[] = [];
 
@@ -75,15 +78,21 @@ export class PatientFormComponent {
   }
 
   loadHospitals() {
+    this.isLoading = true;
     this.hospitalService.findAllHospitals({}).subscribe({
       next: (response: ReturnPaginated<ReturnHospital>) => {
         this.hospitals = response.data;
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     })
   }
 
   loadPatient(id: string): void {
+    this.isLoading = true;
     this.patientService.findPatientById(id).subscribe({
       next: (patient: ReturnPatient) => {
         this.patientForm.patchValue({
@@ -94,8 +103,12 @@ export class PatientFormComponent {
           email: patient.email,
           address: patient.address,
         });
+        this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => this.showError(err)
+      error: (err: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
   }
 
@@ -110,6 +123,8 @@ export class PatientFormComponent {
       hospitalId: this.isAdminGeral ? this.patientForm.get('hospitalId')?.value : this.user.hospitalId
     };
 
+    this.isLoading = true;
+
     if (this.isEditMode && this.patientId) {
       let updateDto = formValue;
 
@@ -119,13 +134,25 @@ export class PatientFormComponent {
       }
 
       this.patientService.updatePatient(this.patientId, updateDto).subscribe({
-        next: () => this.router.navigate(['/patients']),
-        error: (err: HttpErrorResponse) => this.showError(err)
+        next: () => {
+          this.isLoading = false;
+          this.router.navigate(['/patients']);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.isLoading = false;
+          this.showError(err);
+        }
       });
     } else {
       this.patientService.createPatient(formValue).subscribe({
-        next: () => this.router.navigate(['/patients']),
-        error: (err: HttpErrorResponse) => this.showError(err)
+        next: () => {
+          this.isLoading = false;
+          this.router.navigate(['/patients']);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.isLoading = false;
+          this.showError(err);
+        }
       });
     }
   }

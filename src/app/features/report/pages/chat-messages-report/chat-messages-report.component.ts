@@ -9,6 +9,7 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { ReturnPaginated } from '../../../../core/models/pagination/return-paginated.model';
 import { ReturnChatReport } from '../../../../core/models/report/return-chat-report.model';
 import { ReportService } from '../../../../core/services/report/report.service';
+import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-chat-messages-report',
@@ -20,6 +21,7 @@ import { ReportService } from '../../../../core/services/report/report.service';
     MatPaginatorModule,
     MatIconModule,
     MatButtonModule,
+    LoadingComponent
   ],
   templateUrl: './chat-messages-report.component.html',
   styleUrls: ['./chat-messages-report.component.css']
@@ -33,6 +35,7 @@ export class ChatMessagesReportComponent {
   totalItems = 0;
   pageSize = 10;
   pageIndex = 0;
+  isLoading = false;
 
   constructor(
     private reportService: ReportService,
@@ -47,6 +50,7 @@ export class ChatMessagesReportComponent {
   }
 
   loadReports() {
+    this.isLoading = true;
     this.loadReportsObservable().subscribe({
       next: (response: ReturnPaginated<ReturnChatReport>) => this.updateReports(response),
       error: (err: HttpErrorResponse) => this.showError(err)
@@ -71,6 +75,7 @@ export class ChatMessagesReportComponent {
     this.totalItems = response.total;
     this.pageIndex = response.page - 1;
     this.pageSize = response.limit;
+    this.isLoading = false;
   }
 
   onPageChange(event: PageEvent) {
@@ -80,6 +85,7 @@ export class ChatMessagesReportComponent {
   }
 
   showError(err: HttpErrorResponse) {
+    this.isLoading = false;
     const errorMessage = err?.error?.message || 'Erro inesperado. Tente novamente.';
     this.snackBar.open(errorMessage, 'Fechar', {
       duration: 5000,

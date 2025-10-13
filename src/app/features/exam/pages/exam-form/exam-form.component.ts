@@ -11,13 +11,14 @@ import { ReturnHospital } from '../../../../core/models/hospital/return-hospital
 import { ReturnPaginated } from '../../../../core/models/pagination/return-paginated.model';
 import { ReturnPatient } from '../../../../core/models/patient/return-patient.model';
 import { ReturnUser } from '../../../../core/models/user/return-user.model';
-import { ArchiveService } from '../../../../core/services/archive/archive.service';
 import { AuthService } from '../../../../core/services/auth/auth.service';
 import { ExamService } from '../../../../core/services/exam/exam.service';
 import { HospitalService } from '../../../../core/services/hospital/hospital.service';
 import { PatientService } from '../../../../core/services/patient/patient.service';
 import { UserService } from '../../../../core/services/user/user.service';
+import { ArchiveService } from '../../../../core/services/archive/archive.service';
 import { ReturnArchive } from '../../../../core/models/archive/return-archive.model';
+import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-exam-form',
@@ -27,7 +28,8 @@ import { ReturnArchive } from '../../../../core/models/archive/return-archive.mo
     ReactiveFormsModule,
     RouterModule,
     MatButtonModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    LoadingComponent
   ],
   templateUrl: './exam-form.component.html',
   styleUrls: ['./exam-form.component.css']
@@ -46,6 +48,7 @@ export class ExamFormComponent implements OnInit, OnDestroy {
   previewUrl: string | null = null;
   selectedFile: File | null = null;
   archive!: ReturnArchive | null;
+  isLoading = false;
 
   constructor(
     private fb: FormBuilder,
@@ -87,11 +90,11 @@ export class ExamFormComponent implements OnInit, OnDestroy {
             this.medics = [];
             this.patients = [];
           }
-        });
 
-        this.examForm.patchValue({
-          providerId: '',
-          patientId: ''
+          this.examForm.patchValue({
+            providerId: '',
+            patientId: ''
+          });
         });
       } else {
         this.loadUsersByRole(this.user.hospitalId, [Role.Medico], 'medics');
@@ -105,31 +108,49 @@ export class ExamFormComponent implements OnInit, OnDestroy {
   }
 
   loadHospitals() {
+    this.isLoading = true;
     this.hospitalService.findAllHospitals({}).subscribe({
       next: (response: ReturnPaginated<ReturnHospital>) => {
         this.hospitals = response.data;
+        this.isLoading = false;
       },
-      error: (err) => this.showError(err)
+      error: (err) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
   }
 
   loadUsersByRole(hospitalId: string, roles: string[], target: 'medics') {
+    this.isLoading = true;
     this.userService.findUsersByHospital(hospitalId, { roles }).subscribe({
-      next: (response: ReturnPaginated<ReturnUser>) => (this[target] = response.data),
-      error: (err) => this.showError(err)
+      next: (response: ReturnPaginated<ReturnUser>) => {
+        this[target] = response.data;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
   }
 
   loadPatients(hospitalId: string) {
+    this.isLoading = true;
     this.patientService.findPatientsByHospital(hospitalId, {}).subscribe({
       next: (response: ReturnPaginated<ReturnPatient>) => {
         this.patients = response.data;
+        this.isLoading = false;
       },
-      error: (err) => this.showError(err)
+      error: (err) => {
+        this.isLoading = false;
+        this.showError(err);
+      }
     });
   }
 
   loadExam(id: string): void {
+    this.isLoading = true;
     this.examService.findExamById(id).subscribe({
       next: (exam: ReturnExam) => {
         this.examForm.patchValue({
@@ -149,14 +170,20 @@ export class ExamFormComponent implements OnInit, OnDestroy {
               }
               const url = URL.createObjectURL(blob);
               this.previewUrl = url;
+              this.isLoading = false;
             },
-            error: (err) => console.error('Erro ao carregar imagem/PDF:', err)
+            error: (err) => {
+              console.error('Erro ao carregar imagem/PDF:', err);
+              this.isLoading = false;
+            }
           });
         } else {
           this.previewUrl = null;
+          this.isLoading = false;
         }
       },
       error: (err) => {
+        this.isLoading = false;
         this.showError(err);
         this.router.navigate(['/exams']);
       }
@@ -204,17 +231,33 @@ export class ExamFormComponent implements OnInit, OnDestroy {
 
     if (this.selectedFile) formData.append('arquivo', this.selectedFile);
 
+    this.isLoading = true;
+
     if (this.isEditMode && this.examId) {
-      formData.delete('hospitalId');
+      if (!this.isAdminGeral) {
+        formData.delete('hospitalId');
+      }
 
       this.examService.updateExam(this.examId, formData).subscribe({
-        next: () => this.router.navigate(['/exams']),
-        error: (err) => this.showError(err)
+        next: () => {
+          this.isLoading = false;
+          this.router.navigate(['/exams']);
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.showError(err);
+        }
       });
     } else {
       this.examService.createExam(formData).subscribe({
-        next: () => this.router.navigate(['/exams']),
-        error: (err: HttpErrorResponse) => this.showError(err)
+        next: () => {
+          this.isLoading = false;
+          this.router.navigate(['/exams']);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.isLoading = false;
+          this.showError(err);
+        }
       });
     }
   }
