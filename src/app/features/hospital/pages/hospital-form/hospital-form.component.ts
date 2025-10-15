@@ -87,6 +87,7 @@ export class HospitalFormComponent implements OnInit {
       this.hospitalService.updateHospital(this.hospitalId, formValue).subscribe({
         next: () => {
           this.isLoading = false;
+          this.snackBar.open('Hospital atualizado com sucesso!', 'Fechar', { duration: 3000, verticalPosition: 'top', horizontalPosition: 'center', panelClass: ['mat-success'] });
           this.router.navigate(['/hospitals']);
         },
         error: (err: HttpErrorResponse) => {
@@ -98,6 +99,7 @@ export class HospitalFormComponent implements OnInit {
       this.hospitalService.createHospital(formValue).subscribe({
         next: () => {
           this.isLoading = false;
+          this.snackBar.open('Hospital criado com sucesso!', 'Fechar', { duration: 3000, verticalPosition: 'top', horizontalPosition: 'center', panelClass: ['mat-success'] });
           this.router.navigate(['/hospitals']);
         },
         error: (err: HttpErrorResponse) => {

@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { AfterViewChecked, Component, ElementRef, Input, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -21,6 +21,7 @@ import { Subject, takeUntil } from 'rxjs';
   selector: 'app-chat-messages',
   standalone: true,
   imports: [
+    CommonModule,
     MatInputModule,
     MatFormFieldModule,
     MatButtonModule,
@@ -37,6 +38,8 @@ export class ChatMessagesComponent implements OnInit, AfterViewChecked {
   messages: ReturnMessage[] = [];
   newMessage = '';
   files: File[] = [];
+  isUploadingFiles = false;
+  loadingImages = new Set<string>();
 
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
@@ -100,10 +103,17 @@ export class ChatMessagesComponent implements OnInit, AfterViewChecked {
       if (this.isMyMessage(message) && this.files.length > 0) {
         this.archiveService.uploadFiles(message.id, this.files).subscribe({
           next: () => {
+            console.log('Upload concluído com sucesso');
             this.clearFiles();
+            this.isUploadingFiles = false;
           },
-          error: (err) => console.error('Erro ao enviar arquivos:', err)
+          error: (err) => {
+            console.error('Erro ao enviar arquivos:', err);
+            this.isUploadingFiles = false;
+          }
         });
+      } else if (this.isMyMessage(message) && this.files.length === 0) {
+        this.isUploadingFiles = false;
       }
 
       if (message.archives?.length) this.preloadImages([message]);
@@ -149,6 +159,10 @@ export class ChatMessagesComponent implements OnInit, AfterViewChecked {
   async sendMessage() {
     if (!this.newMessage.trim() && this.files.length === 0) return;
 
+    if (this.files.length > 0) {
+      this.isUploadingFiles = true;
+    }
+
     const createMessage = {
       content: this.newMessage,
       roomId: this.room.id
@@ -175,12 +189,17 @@ export class ChatMessagesComponent implements OnInit, AfterViewChecked {
   loadImage(filenames: string[]): void {
     filenames.forEach((name) => {
       if (!this.imageUrls.has(name)) {
+        this.loadingImages.add(name);
         this.archiveService.getImage(name).subscribe({
           next: blob => {
             const url = URL.createObjectURL(blob);
             this.imageUrls.set(name, this.sanitizer.bypassSecurityTrustUrl(url));
+            this.loadingImages.delete(name);
           },
-          error: err => console.error('Erro ao carregar imagem', err)
+          error: err => {
+            console.error('Erro ao carregar imagem', err);
+            this.loadingImages.delete(name);
+          }
         });
       }
     });
@@ -205,11 +224,21 @@ export class ChatMessagesComponent implements OnInit, AfterViewChecked {
     }
   }
 
+  isImageLoading(filename: string): boolean {
+    return this.loadingImages.has(filename);
+  }
+
   openImageViewer(imageUrl: SafeUrl): void {
     this.dialog.open(ImageViewerModalComponent, {
       data: { imageUrl },
-      panelClass: 'fullscreen-modal',
-      backdropClass: 'dark-backdrop'
+      width: '800px',
+      height: '600px',
+      maxWidth: 'none',
+      maxHeight: 'none',
+      panelClass: 'image-viewer-modal',
+      backdropClass: 'dark-backdrop',
+      hasBackdrop: true,
+      disableClose: false
     });
   }
 

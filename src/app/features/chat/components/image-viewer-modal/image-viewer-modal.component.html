@@ -1,8 +1,7 @@
-<div class="position-relative w-100 h-100 d-flex justify-content-center align-items-center">
-    <img [src]="data.imageUrl" alt="Imagem ampliada" class="w-100 h-100" style="object-fit: contain;" />
-
-    <button matButton>
-        <mat-icon class="position-absolute top-0 end-0 p-0 m-3 bg-transparent text-white shadow"
-        style="z-index: 10;" (click)="close()" aria-label="Fechar">close</mat-icon>
+<div class="image-viewer-container">
+    <img [src]="data.imageUrl" alt="Imagem ampliada" class="viewer-image" />
+    
+    <button class="close-button" (click)="close()" aria-label="Fechar">
+        <mat-icon class="close-icon">close</mat-icon>
     </button>
 </div>

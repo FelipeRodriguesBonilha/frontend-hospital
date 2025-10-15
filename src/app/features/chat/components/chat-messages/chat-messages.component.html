@@ -36,12 +36,21 @@
                         <div class="d-flex flex-wrap gap-2 mb-2">
                             @for(archive of message.archives; track $index){
                             @if(typeArchive(archive.type) === 'image'){
-                            <img [src]="imageUrls.get(archive.name)" class="rounded shadow-sm" (click)="openImageViewer(imageUrls.get(archive.name)!)"
-                                style="width: 48px; height: 48px; object-fit: cover;" alt="anexo" />
+                                @if(isImageLoading(archive.name)) {
+                                <div class="d-flex align-items-center justify-content-center bg-light rounded shadow-sm loading-placeholder"
+                                    style="width: 48px; height: 48px;">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                        <span class="visually-hidden">Carregando...</span>
+                                    </div>
+                                </div>
+                                } @else {
+                                <img [src]="imageUrls.get(archive.name)" class="rounded shadow-sm" (click)="openImageViewer(imageUrls.get(archive.name)!)" 
+                                    style="width: 48px; height: 48px; object-fit: cover; cursor: pointer;" alt="anexo" />
+                                }
                             } @else if(typeArchive(archive.type) === 'pdf') {
                             <a [href]="imageUrls.get(archive.name)" [attr.download]="archive.name"
-                                class="d-flex align-items-center justify-content-center bg-light rounded shadow-sm me-2 text-decoration-none"
-                                style="width: 48px; height: 48px;" title="Baixar PDF">
+                                class="d-flex align-items-center justify-content-center bg-light rounded shadow-sm text-decoration-none"
+                                style="width: 48px; height: 48px;" [title]="'Baixar PDF ' + archive.name">
                                 <i class="bi bi-file-earmark-pdf-fill text-danger fs-4"></i>
                             </a>
                             }
@@ -72,12 +81,21 @@
                         <div class="d-flex flex-wrap gap-2 mb-2">
                             @for(archive of message.archives; track $index){
                                 @if(typeArchive(archive.type) === 'image'){
+                                    @if(isImageLoading(archive.name)) {
+                                    <div class="d-flex align-items-center justify-content-center bg-light rounded shadow-sm loading-placeholder"
+                                        style="width: 48px; height: 48px;">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                            <span class="visually-hidden">Carregando...</span>
+                                        </div>
+                                    </div>
+                                    } @else {
                                     <img [src]="imageUrls.get(archive.name)" class="rounded shadow-sm" (click)="openImageViewer(imageUrls.get(archive.name)!)"
-                                    style="width: 48px; height: 48px; object-fit: cover;" alt="anexo" />
+                                        style="width: 48px; height: 48px; object-fit: cover; cursor: pointer;" alt="anexo" />
+                                    }
                                 } @else if(typeArchive(archive.type) === 'pdf') {
                                     <a [href]="imageUrls.get(archive.name)" [attr.download]="archive.name"
-                                        class="d-flex align-items-center justify-content-center bg-light rounded shadow-sm me-2 text-decoration-none"
-                                        style="width: 48px; height: 48px;" title="Baixar PDF">
+                                        class="d-flex align-items-center justify-content-center bg-light rounded shadow-sm text-decoration-none"
+                                        style="width: 48px; height: 48px;" [title]="'Baixar PDF ' + archive.name">
                                         <i class="bi bi-file-earmark-pdf-fill text-danger fs-4"></i>
                                     </a>
                                 }
@@ -111,12 +129,18 @@
 
 
     <div class="bg-white border-top shadow-sm p-3 flex-shrink-0">
+        <!-- Debug: Estado do loading -->
+        @if(isUploadingFiles) {
+        <div class="alert alert-info py-1 px-2 mb-2 small">
+            <i class="bi bi-hourglass-split"></i> Enviando arquivos...
+        </div>
+        }
         <div class="d-flex align-items-end gap-2">
             <div class="flex-shrink-0 position-relative" style="width: 45px; height: 45px;">
                 <label for="fileInput"
                     class="btn btn-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center position-relative w-100 h-100 m-0">
                     <i class="bi bi-paperclip text-white"></i>
-                    <input #fileInput type="file" id="fileInput" hidden multiple (change)="onFilesSelected($event)" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp,image/svg+xml,application/pdf" />
+                    <input #fileInput type="file" id="fileInput" hidden multiple (change)="onFilesSelected($event)" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp,application/pdf" />
 
                     @if (files.length) {
                     <span
@@ -145,9 +169,15 @@
             <div class="flex-shrink-0">
                 <button
                     class="btn btn-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center"
-                    (click)="sendMessage()" [disabled]="!newMessage.trim() || !room.id"
+                    (click)="sendMessage()" [disabled]="(!newMessage.trim() && files.length === 0) || !room.id || isUploadingFiles"
                     style="width: 45px; height: 45px;">
-                    <i class="bi bi-send-fill"></i>
+                    @if(isUploadingFiles) {
+                        <div class="spinner-border spinner-border-sm text-white" role="status">
+                            <span class="visually-hidden">Enviando...</span>
+                        </div>
+                    } @else {
+                        <i class="bi bi-send-fill"></i>
+                    }
                 </button>
             </div>
         </div>

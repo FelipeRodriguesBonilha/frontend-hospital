@@ -54,7 +54,7 @@ export class ProfileEditComponent {
         this.socketService.onUserUpdated((updatedUser: ReturnUser) => {
           this.isLoading = false;
           this.authService.updateCurrentUser(updatedUser);
-          this.snackBar.open('Perfil atualizado com sucesso!', 'Fechar', { duration: 3000 });
+          this.snackBar.open('Perfil atualizado com sucesso!', 'Fechar', { duration: 3000, verticalPosition: 'top', horizontalPosition: 'center', panelClass: ['mat-success'] });
         });
       }
     });

@@ -181,11 +181,14 @@ export class SchedulingFormComponent {
       return;
     }
 
+    const observation = this.schedulingForm.value.observation?.trim();
+
     const formValue = {
       ...this.schedulingForm.value,
       startDate: new Date(this.schedulingForm.value.startDate).toISOString(),
       endDate: new Date(this.schedulingForm.value.endDate).toISOString(),
-      hospitalId: this.isAdminGeral ? this.schedulingForm.get('hospitalId')?.value : this.user.hospitalId
+      hospitalId: this.isAdminGeral ? this.schedulingForm.get('hospitalId')?.value : this.user.hospitalId,
+      observation: observation || undefined
     };
 
     this.isLoading = true;
@@ -201,6 +204,7 @@ export class SchedulingFormComponent {
       this.schedulingService.updateScheduling(this.schedulingId, updateDto).subscribe({
         next: () => {
           this.isLoading = false;
+          this.snackBar.open('Agendamento atualizado com sucesso!', 'Fechar', { duration: 3000, verticalPosition: 'top', horizontalPosition: 'center', panelClass: ['mat-success'] });
           this.router.navigate(['/schedulings']);
         },
         error: (err: HttpErrorResponse) => {
@@ -212,6 +216,7 @@ export class SchedulingFormComponent {
       this.schedulingService.createScheduling(formValue).subscribe({
         next: () => {
           this.isLoading = false;
+          this.snackBar.open('Agendamento criado com sucesso!', 'Fechar', { duration: 3000, verticalPosition: 'top', horizontalPosition: 'center', panelClass: ['mat-success'] });
           this.router.navigate(['/schedulings']);
         },
         error: (err: HttpErrorResponse) => {

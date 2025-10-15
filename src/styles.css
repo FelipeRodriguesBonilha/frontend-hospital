@@ -14,3 +14,16 @@
     font-style: normal;
 }
 
+.image-viewer-modal .mat-mdc-dialog-container {
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: transparent !important;
+}
+
+.image-viewer-modal .mdc-dialog__surface {
+    overflow: hidden !important;
+}
+
+.dark-backdrop {
+    background-color: rgba(0, 0, 0, 0.85) !important;
+}

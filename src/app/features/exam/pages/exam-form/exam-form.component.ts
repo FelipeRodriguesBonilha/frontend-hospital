@@ -241,6 +241,7 @@ export class ExamFormComponent implements OnInit, OnDestroy {
       this.examService.updateExam(this.examId, formData).subscribe({
         next: () => {
           this.isLoading = false;
+          this.snackBar.open('Exame atualizado com sucesso!', 'Fechar', { duration: 3000, verticalPosition: 'top', horizontalPosition: 'center', panelClass: ['mat-success'] });
           this.router.navigate(['/exams']);
         },
         error: (err) => {
@@ -252,6 +253,7 @@ export class ExamFormComponent implements OnInit, OnDestroy {
       this.examService.createExam(formData).subscribe({
         next: () => {
           this.isLoading = false;
+          this.snackBar.open('Exame criado com sucesso!', 'Fechar', { duration: 3000, verticalPosition: 'top', horizontalPosition: 'center', panelClass: ['mat-success'] });
           this.router.navigate(['/exams']);
         },
         error: (err: HttpErrorResponse) => {

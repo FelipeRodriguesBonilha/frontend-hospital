@@ -61,7 +61,6 @@ export class PatientFormComponent {
         this.user = user;
         this.isAdminGeral = user.role.name === 'AdminGeral';
 
-
         this.patientForm = this.fb.group({
           hospitalId: ['', this.isAdminGeral ? [Validators.required] : []],
           name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
@@ -136,6 +135,7 @@ export class PatientFormComponent {
       this.patientService.updatePatient(this.patientId, updateDto).subscribe({
         next: () => {
           this.isLoading = false;
+          this.snackBar.open('Paciente atualizado com sucesso!', 'Fechar', { duration: 3000, verticalPosition: 'top', horizontalPosition: 'center', panelClass: ['mat-success'] });
           this.router.navigate(['/patients']);
         },
         error: (err: HttpErrorResponse) => {
@@ -147,6 +147,7 @@ export class PatientFormComponent {
       this.patientService.createPatient(formValue).subscribe({
         next: () => {
           this.isLoading = false;
+          this.snackBar.open('Paciente criado com sucesso!', 'Fechar', { duration: 3000, verticalPosition: 'top', horizontalPosition: 'center', panelClass: ['mat-success'] });
           this.router.navigate(['/patients']);
         },
         error: (err: HttpErrorResponse) => {

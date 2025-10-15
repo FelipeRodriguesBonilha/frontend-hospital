@@ -64,7 +64,7 @@ export class UserFormComponent {
 
         this.socketService.onUserCreated((user) => {
           this.isLoading = false;
-          this.snackBar.open('Usuário criado com sucesso!', 'Fechar', { duration: 3000 });
+          this.snackBar.open('Usuário criado com sucesso!', 'Fechar', { duration: 3000, verticalPosition: 'top', horizontalPosition: 'center', panelClass: ['mat-success'] });
           this.router.navigate(['/users']);
         });
 
@@ -74,7 +74,7 @@ export class UserFormComponent {
           }
 
           this.isLoading = false;
-          this.snackBar.open('Usuário atualizado com sucesso!', 'Fechar', { duration: 3000 });
+          this.snackBar.open('Usuário atualizado com sucesso!', 'Fechar', { duration: 3000, verticalPosition: 'top', horizontalPosition: 'center', panelClass: ['mat-success'] });
           this.router.navigate(['/users']);
         });
 

@@ -217,4 +217,19 @@ export class UsersComponent {
       }
     });
   }
+
+  getRoleName(roleName: string): string {
+    switch(roleName){
+      case 'AdminGeral':
+        return 'Admin Geral';
+      case 'AdminHospital':
+        return 'Admin Hospital';
+      case 'Medico':
+        return 'Médico';
+      case 'Recepcionista':
+        return 'Recepcionista';
+      default:
+        return roleName;
+    }
+  }
 }
